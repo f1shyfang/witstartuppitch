@@ -32,6 +32,7 @@ const supabaseAuth = createClient(
 );
 
 export const authConfig = {
+  trustHost: true,
   providers: [
     Credentials({
       name: "Email",
