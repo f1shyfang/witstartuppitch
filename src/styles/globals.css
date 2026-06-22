@@ -1,6 +1,80 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lusitana), Georgia, "Times New Roman", serif;
+
+  --color-bg: oklch(1 0 0);
+  --color-surface: oklch(0.97 0.008 290);
+  --color-ink: oklch(0.22 0.025 290);
+  --color-muted: oklch(0.48 0.02 290);
+  --color-primary: oklch(0.52 0.18 290);
+  --color-primary-hover: oklch(0.46 0.19 290);
+  --color-accent: oklch(0.68 0.15 55);
+  --color-accent-ink: oklch(0.28 0.06 55);
+  --color-accent-soft: oklch(0.94 0.04 55);
+  --color-border: oklch(0.91 0.012 290);
+  --color-primary-soft: oklch(0.95 0.03 290);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-bg font-serif text-ink antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-sans;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer utilities {
+  .animate-rise {
+    animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-rise-delay-1 {
+    animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  }
+
+  .animate-rise-delay-2 {
+    animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-rise,
+    .animate-rise-delay-1,
+    .animate-rise-delay-2 {
+      animation: none;
+    }
+  }
 }

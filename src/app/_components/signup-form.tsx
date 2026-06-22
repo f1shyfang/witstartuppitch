@@ -61,12 +61,12 @@ export function SignupForm({ onSwitchToSignin }: SignupFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur"
-    >
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
       <div>
-        <label htmlFor="name" className="mb-1 block text-sm text-white/70">
+        <label
+          htmlFor="name"
+          className="mb-1.5 block font-sans text-sm font-medium text-ink"
+        >
           Name
         </label>
         <input
@@ -74,36 +74,42 @@ export function SignupForm({ onSwitchToSignin }: SignupFormProps) {
           type="text"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white outline-none ring-violet-400 focus:ring-2"
+          className="w-full rounded-md border border-border bg-bg px-3 py-2.5 font-sans text-ink outline-none ring-primary/30 transition-shadow placeholder:text-muted focus:ring-2"
           placeholder="Ada Lovelace"
           autoComplete="name"
         />
       </div>
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm text-white/70">
+        <label
+          htmlFor="signup-email"
+          className="mb-1.5 block font-sans text-sm font-medium text-ink"
+        >
           Email
         </label>
         <input
-          id="email"
+          id="signup-email"
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white outline-none ring-violet-400 focus:ring-2"
+          className="w-full rounded-md border border-border bg-bg px-3 py-2.5 font-sans text-ink outline-none ring-primary/30 transition-shadow placeholder:text-muted focus:ring-2"
           placeholder="founder@startup.com"
           autoComplete="email"
           required
         />
       </div>
       <div>
-        <label htmlFor="password" className="mb-1 block text-sm text-white/70">
+        <label
+          htmlFor="signup-password"
+          className="mb-1.5 block font-sans text-sm font-medium text-ink"
+        >
           Password
         </label>
         <input
-          id="password"
+          id="signup-password"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white outline-none ring-violet-400 focus:ring-2"
+          className="w-full rounded-md border border-border bg-bg px-3 py-2.5 font-sans text-ink outline-none ring-primary/30 transition-shadow placeholder:text-muted focus:ring-2"
           placeholder="••••••••"
           autoComplete="new-password"
           minLength={6}
@@ -113,7 +119,7 @@ export function SignupForm({ onSwitchToSignin }: SignupFormProps) {
       <div>
         <label
           htmlFor="confirm-password"
-          className="mb-1 block text-sm text-white/70"
+          className="mb-1.5 block font-sans text-sm font-medium text-ink"
         >
           Confirm password
         </label>
@@ -122,27 +128,31 @@ export function SignupForm({ onSwitchToSignin }: SignupFormProps) {
           type="password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white outline-none ring-violet-400 focus:ring-2"
+          className="w-full rounded-md border border-border bg-bg px-3 py-2.5 font-sans text-ink outline-none ring-primary/30 transition-shadow placeholder:text-muted focus:ring-2"
           placeholder="••••••••"
           autoComplete="new-password"
           minLength={6}
           required
         />
       </div>
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? (
+        <p className="font-sans text-sm text-red-700" role="alert">
+          {error}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={loading}
-        className="rounded-full bg-violet-500 px-4 py-2.5 font-semibold text-white transition hover:bg-violet-400 disabled:opacity-60"
+        className="rounded-full bg-primary px-4 py-2.5 font-sans text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
       >
         {loading ? "Creating account..." : "Create account"}
       </button>
-      <p className="text-center text-xs text-white/50">
+      <p className="text-center font-sans text-xs text-muted">
         Already have an account?{" "}
         <button
           type="button"
           onClick={onSwitchToSignin}
-          className="text-violet-300 hover:text-violet-200"
+          className="font-medium text-primary hover:text-primary-hover"
         >
           Sign in
         </button>
