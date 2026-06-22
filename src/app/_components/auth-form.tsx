@@ -31,7 +31,7 @@ export function AuthForm({ onSwitchToSignup }: AuthFormProps) {
       return;
     }
 
-    window.location.reload();
+    window.location.href = "/test";
   }
 
   return (
