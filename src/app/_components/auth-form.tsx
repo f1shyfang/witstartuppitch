@@ -3,7 +3,11 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
-export function AuthForm() {
+type AuthFormProps = {
+  onSwitchToSignup?: () => void;
+};
+
+export function AuthForm({ onSwitchToSignup }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +76,14 @@ export function AuthForm() {
         {loading ? "Signing in..." : "Sign in"}
       </button>
       <p className="text-center text-xs text-white/50">
-        Email + password only. MFA / 2FA is disabled.
+        No account yet?{" "}
+        <button
+          type="button"
+          onClick={onSwitchToSignup}
+          className="text-violet-300 hover:text-violet-200"
+        >
+          Sign up
+        </button>
       </p>
     </form>
   );

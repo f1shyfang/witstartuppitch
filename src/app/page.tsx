@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AuthForm } from "~/app/_components/auth-form";
+import { AuthPanel } from "~/app/_components/auth-panel";
 import { auth, signOut } from "~/server/auth";
 
 const features = [
@@ -40,6 +40,9 @@ export default async function Home() {
           <a href="#auth" className="hover:text-white">
             Sign in
           </a>
+          <a href="#signup" className="hover:text-white">
+            Sign up
+          </a>
         </nav>
       </header>
 
@@ -59,7 +62,7 @@ export default async function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               <a
-                href="#auth"
+                href="#signup"
                 className="rounded-full bg-violet-500 px-6 py-3 font-semibold text-white transition hover:bg-violet-400"
               >
                 Get started
@@ -115,15 +118,7 @@ export default async function Home() {
                 </form>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="space-y-1 text-center">
-                  <h2 className="text-2xl font-semibold">Welcome back</h2>
-                  <p className="text-sm text-white/60">
-                    Sign in with your Supabase user credentials.
-                  </p>
-                </div>
-                <AuthForm />
-              </div>
+              <AuthPanel />
             )}
           </div>
         </section>
@@ -150,7 +145,7 @@ export default async function Home() {
               Swap in your real plans when you are ready to launch.
             </p>
             <a
-              href="#auth"
+              href="#signup"
               className="mt-6 inline-flex rounded-full bg-white px-6 py-3 font-semibold text-black transition hover:bg-white/90"
             >
               Join the waitlist
