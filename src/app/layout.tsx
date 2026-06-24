@@ -7,9 +7,9 @@ import { SessionProvider } from "next-auth/react";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: "WitStartupPitch",
+  title: "FlagDown — Beach safety coordination",
   description:
-    "Shape your startup story for demo day — clear narrative, founder-first workflow.",
+    "Council-first coordination layer for Australian beach safety — route threat signals to the right actors in under 60 seconds.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

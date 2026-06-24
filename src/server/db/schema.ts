@@ -106,3 +106,115 @@ export const verificationTokens = createTable(
   }),
   (t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );
+
+export const beaches = createTable(
+  "beach",
+  (d) => ({
+    id: d.varchar({ length: 64 }).primaryKey(),
+    name: d.varchar({ length: 256 }).notNull(),
+    lat: d.doublePrecision().notNull(),
+    lng: d.doublePrecision().notNull(),
+    patrolType: d.varchar({ length: 32 }).notNull(),
+    councilLga: d.varchar({ length: 128 }).notNull(),
+    slsClub: d.varchar({ length: 128 }),
+    flagStatus: d.varchar({ length: 32 }).notNull().default("green"),
+    threatLevel: d.integer().notNull().default(0),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [index("beach_lga_idx").on(t.councilLga)],
+);
+
+export const threatEvents = createTable(
+  "threat_event",
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    beachId: d
+      .varchar({ length: 64 })
+      .notNull()
+      .references(() => beaches.id),
+    type: d.varchar({ length: 32 }).notNull(),
+    source: d.varchar({ length: 128 }).notNull(),
+    confidence: d.doublePrecision(),
+    level: d.integer().notNull(),
+    reasoning: d.text(),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [index("threat_beach_idx").on(t.beachId)],
+);
+
+export const coordinationActions = createTable(
+  "coordination_action",
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    threatEventId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => threatEvents.id),
+    channel: d.varchar({ length: 64 }).notNull(),
+    status: d.varchar({ length: 32 }).notNull().default("pending"),
+    priority: d.integer().notNull(),
+    message: d.text().notNull(),
+    newFlagStatus: d.varchar({ length: 32 }),
+    completedAt: d.timestamp({ withTimezone: true }),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [index("action_threat_idx").on(t.threatEventId)],
+);
+
+export const acks = createTable("ack", (d) => ({
+  id: d
+    .varchar({ length: 255 })
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  threatEventId: d
+    .varchar({ length: 255 })
+    .notNull()
+    .references(() => threatEvents.id),
+  actorType: d.varchar({ length: 64 }).notNull(),
+  actorId: d.varchar({ length: 128 }),
+  response: d.varchar({ length: 64 }).notNull(),
+  createdAt: d
+    .timestamp({ withTimezone: true })
+    .$defaultFn(() => new Date())
+    .notNull(),
+}));
+
+export const beachesRelations = relations(beaches, ({ many }) => ({
+  threatEvents: many(threatEvents),
+}));
+
+export const threatEventsRelations = relations(
+  threatEvents,
+  ({ one, many }) => ({
+    beach: one(beaches, {
+      fields: [threatEvents.beachId],
+      references: [beaches.id],
+    }),
+    actions: many(coordinationActions),
+  }),
+);
+
+export const coordinationActionsRelations = relations(
+  coordinationActions,
+  ({ one }) => ({
+    threatEvent: one(threatEvents, {
+      fields: [coordinationActions.threatEventId],
+      references: [threatEvents.id],
+    }),
+  }),
+);

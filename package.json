@@ -9,6 +9,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
+    "db:setup-flagdown": "tsx --env-file=.env src/scripts/setup-flagdown-db.ts",
     "db:studio": "drizzle-kit studio",
     "dev": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
@@ -19,7 +20,8 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:beaches": "tsx src/scripts/seed-beaches.ts",
+    "seed:beaches": "tsx --env-file=.env src/scripts/seed-beaches.ts",
+    "cv:download-samples": "bash scripts/download-kaggle-cv-samples.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

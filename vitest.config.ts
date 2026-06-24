@@ -6,6 +6,9 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts"],
     passWithNoTests: true,
+    env: {
+      SKIP_ENV_VALIDATION: "1",
+    },
   },
   resolve: {
     alias: {
