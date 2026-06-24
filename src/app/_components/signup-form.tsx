@@ -53,11 +53,11 @@ export function SignupForm({ onSwitchToSignin }: SignupFormProps) {
     setLoading(false);
 
     if (signInResult?.error) {
-      setError("Account created. Please sign in with your credentials.");
+      setError("Account created, but sign-in failed. Please sign in manually.");
       return;
     }
 
-    window.location.href = "/test";
+    window.location.assign("/test");
   }
 
   return (
