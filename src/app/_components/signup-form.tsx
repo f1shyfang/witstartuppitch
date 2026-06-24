@@ -57,7 +57,7 @@ export function SignupForm({ onSwitchToSignin }: SignupFormProps) {
       return;
     }
 
-    window.location.assign("/");
+    window.location.assign("/test");
   }
 
   return (

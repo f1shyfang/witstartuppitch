@@ -1,86 +1,95 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { AuthPanel } from "~/app/_components/auth-panel";
-import { auth, signOut } from "~/server/auth";
-
 const workflow = [
   {
     step: "1",
-    title: "Drop in your draft",
+    title: "Threat signal arrives",
     description:
-      "Paste notes, deck bullets, or traction stats. No rigid template — start messy.",
+      "Computer vision, acoustic shark tags, or BOM weather alerts — heterogeneous inputs, one ingest layer.",
   },
   {
     step: "2",
-    title: "Shape the narrative",
+    title: "Router decides in seconds",
     description:
-      "Reorder sections until the story scans: problem, insight, momentum, ask.",
+      "AI classifies threat level, beach context, and the channel sequence — lifeguard, flags, PA, swimmer push.",
   },
   {
     step: "3",
-    title: "Walk into the room ready",
+    title: "Actors coordinate",
     description:
-      "Export a clean outline you can rehearse aloud before demo day.",
+      "Patrolled beaches route through lifeguards. Unpatrolled stretches hit council PA directly. All under 60 seconds.",
   },
 ];
 
 const strengths = [
   {
-    title: "Pitch in minutes, not weeks",
+    title: "Patrolled beach handoff",
     description:
-      "Investors skim fast. WitStartupPitch keeps every section tight enough to read between meetings.",
+      "Shark tag at Manly South Steyne → lifeguard PWA buzzes → flag downgrade → swimmer push. Minutes become seconds.",
   },
   {
-    title: "Founder-first, not CRM-first",
+    title: "Unpatrolled blind spots covered",
     description:
-      "Built for teams who need momentum — not another bloated fundraising pipeline.",
+      "Collins Flat has no SLS patrol. Same threat router skips lifeguard and fires council PA plus push — no dead zone.",
   },
   {
-    title: "Postgres under the hood",
+    title: "Multi-threat escalation",
     description:
-      "Supabase auth and Drizzle ORM wired in. Password sign-in, no 2FA gate while you iterate locally.",
+      "When BOM cyclone watch layers on an active shark alert, one escalation path coordinates every channel — not three separate apps.",
   },
 ];
 
-export default async function Home() {
-  const session = await auth();
+const routes = [
+  {
+    title: "Council command centre",
+    description: "Live map, threat pins, timeline feed, and demo inject controls.",
+    href: "/flagdown/dashboard",
+    cta: "Open dashboard",
+  },
+  {
+    title: "Lifeguard PWA",
+    description: "Mobile alert card — acknowledge, escalate, or mark false alarm.",
+    href: "/flagdown/lifeguard",
+    cta: "Open lifeguard view",
+  },
+];
 
+export default function Home() {
   return (
-    <div className="min-h-screen bg-bg text-ink">
-      <header className="sticky top-0 z-20 border-b border-border/80 bg-bg/90 backdrop-blur-sm">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <Link
             href="/"
-            className="font-sans text-lg font-semibold tracking-tight text-ink"
+            className="font-sans text-lg font-semibold tracking-tight text-slate-100"
           >
-            WitStartup
-            <span className="text-primary">Pitch</span>
+            Flag<span className="text-amber-400">Down</span>
           </Link>
           <nav className="flex items-center gap-5 font-sans text-sm">
             <a
               href="#workflow"
-              className="hidden text-muted transition-colors hover:text-ink sm:inline"
+              className="hidden text-slate-400 transition-colors hover:text-slate-100 sm:inline"
             >
               How it works
             </a>
             <a
               href="#features"
-              className="hidden text-muted transition-colors hover:text-ink sm:inline"
+              className="hidden text-slate-400 transition-colors hover:text-slate-100 sm:inline"
             >
-              Why founders use it
-            </a>
-            <a
-              href="#auth"
-              className="text-muted transition-colors hover:text-ink"
-            >
-              Sign in
+              Why councils need it
             </a>
             <Link
-              href="/#signup"
-              className="rounded-full bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary-hover"
+              href="/flagdown/lifeguard"
+              className="text-slate-400 transition-colors hover:text-slate-100"
             >
-              Get started
+              Lifeguard
+            </Link>
+            <Link
+              href="/flagdown/dashboard"
+              className="rounded-full bg-amber-500 px-4 py-2 font-medium text-slate-950 transition-colors hover:bg-amber-400"
+            >
+              Command centre
             </Link>
           </nav>
         </div>
@@ -89,94 +98,89 @@ export default async function Home() {
       <main>
         <section className="relative overflow-hidden">
           <div
-            className="pointer-events-none absolute -right-32 -top-24 h-[28rem] w-[28rem] rounded-full bg-primary-soft blur-3xl"
+            className="pointer-events-none absolute -right-32 -top-24 h-[28rem] w-[28rem] rounded-full bg-amber-500/10 blur-3xl"
             aria-hidden
           />
           <div className="mx-auto grid max-w-6xl gap-12 px-6 pb-16 pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-16 lg:pb-24 lg:pt-20">
             <div className="space-y-8">
-              <p className="animate-rise font-sans text-sm font-medium text-accent-ink">
-                For founders rehearsing before demo day
+              <p className="animate-rise font-sans text-sm font-medium text-amber-400/90">
+                Northern Beaches Council · Beach safety coordination
               </p>
-              <h1 className="animate-rise-delay-1 max-w-[14ch] font-sans text-[clamp(2.5rem,5.5vw,4.25rem)] font-semibold leading-[1.08] tracking-[-0.03em]">
-                Tell your story so investors lean in.
+              <h1 className="animate-rise-delay-1 max-w-[16ch] font-sans text-[clamp(2.5rem,5.5vw,4rem)] font-semibold leading-[1.08] tracking-[-0.03em]">
+                The 60-second beach handoff.
               </h1>
-              <p className="animate-rise-delay-2 max-w-[42ch] text-lg leading-relaxed text-muted">
-                Shape a clear startup narrative — deck, traction, team — without
-                drowning in fundraising software. Built on T3, Drizzle, and
-                Supabase so you can ship the product next.
+              <p className="animate-rise-delay-2 max-w-[44ch] text-lg leading-relaxed text-slate-400">
+                Green flag. Tagged shark 400m out. Three agencies. Zero
+                coordinated response — until now. FlagDown routes threat signals
+                to the right actors through the right channels, based on beach
+                context and escalating threat level.
               </p>
               <div className="flex flex-wrap items-center gap-3 font-sans">
                 <Link
-                  href="/#signup"
-                  className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+                  href="/flagdown/dashboard"
+                  className="rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-400"
                 >
-                  Start your pitch
+                  Open command centre
                 </Link>
                 <a
                   href="#workflow"
-                  className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface"
+                  className="rounded-full border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-100 transition-colors hover:bg-slate-900"
                 >
-                  See the workflow
+                  See how it works
                 </a>
               </div>
-              <p className="max-w-md font-sans text-sm text-muted">
-                Postgres · Password auth · No 2FA friction while you build
+              <p className="max-w-md font-sans text-sm text-slate-500">
+                Threat router · Supabase Realtime · Council-first SaaS
               </p>
             </div>
 
             <div
-              id="auth"
-              className="animate-rise-delay-2 scroll-mt-24 rounded-[1.25rem] border border-border bg-bg p-6 shadow-[0_24px_48px_oklch(0.22_0.04_290/0.08)] sm:p-8"
+              id="access"
+              className="animate-rise-delay-2 scroll-mt-24 space-y-4 rounded-[1.25rem] border border-slate-800 bg-slate-900/60 p-6 sm:p-8"
             >
-              {session?.user ? (
-                <div className="space-y-5 text-center">
-                  <p className="font-sans text-sm font-medium text-primary">
-                    Signed in as
+              <p className="font-sans text-sm font-medium text-amber-400">
+                Demo access
+              </p>
+              {routes.map((route) => (
+                <Link
+                  key={route.href}
+                  href={route.href}
+                  className="block rounded-xl border border-slate-800 bg-slate-950/80 p-5 transition-colors hover:border-amber-500/40 hover:bg-slate-900"
+                >
+                  <h2 className="font-sans text-lg font-semibold text-slate-100">
+                    {route.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-400">
+                    {route.description}
                   </p>
-                  <p className="font-sans text-2xl font-semibold">
-                    {session.user.name ?? session.user.email}
-                  </p>
-                  <form
-                    action={async () => {
-                      "use server";
-                      await signOut({ redirectTo: "/" });
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      className="rounded-full border border-border px-6 py-2.5 font-sans text-sm font-semibold transition-colors hover:bg-surface"
-                    >
-                      Sign out
-                    </button>
-                  </form>
-                </div>
-              ) : (
-                <AuthPanel />
-              )}
+                  <span className="mt-3 inline-block font-sans text-sm font-medium text-amber-400">
+                    {route.cta} →
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="border-y border-border bg-surface">
+        <section className="border-y border-slate-800 bg-slate-900/40">
           <div className="relative mx-auto max-w-6xl px-6 py-4">
             <div className="relative aspect-[21/9] min-h-[12rem] overflow-hidden rounded-xl sm:min-h-[16rem]">
               <Image
-                src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80"
-                alt="Founders gathered around a table, rehearsing a pitch before a presentation"
+                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80"
+                alt="Aerial view of an Australian beach with surf and swimmers"
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 1152px"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/35 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent" />
               <blockquote className="absolute bottom-0 left-0 max-w-xl p-6 text-white sm:p-10">
                 <p className="font-sans text-xl font-medium leading-snug sm:text-2xl">
-                  &ldquo;The best pitches sound like a conversation you already
-                  had — just tighter.&rdquo;
+                  &ldquo;Same threat. Different actors. One router.&rdquo;
                 </p>
                 <footer className="mt-3 font-sans text-sm text-white/75">
-                  Rehearse aloud. Cut everything that doesn&apos;t earn the next
-                  slide.
+                  Patrolled beach: lifeguard alerted in 11 seconds. Unpatrolled
+                  beach 2km south: council siren — no lifeguard in the loop.
                 </footer>
               </blockquote>
             </div>
@@ -187,22 +191,26 @@ export default async function Home() {
           <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
             <div className="mb-14 max-w-2xl">
               <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
-                Three passes to a pitch you can deliver
+                Coordination decisions at the speed of data
               </h2>
-              <p className="mt-4 text-lg text-muted">
-                Order matters here — each step builds on the last.
+              <p className="mt-4 text-lg text-slate-400">
+                Detection is an input. Council dashboard, lifeguard PWA, flags,
+                PA, and push notifications are outputs. FlagDown owns the
+                handoff.
               </p>
             </div>
             <ol className="grid gap-10 lg:grid-cols-3 lg:gap-8">
               {workflow.map((item) => (
                 <li key={item.step} className="group">
-                  <span className="font-sans text-5xl font-semibold leading-none text-primary/25 transition-colors group-hover:text-primary/40">
+                  <span className="font-sans text-5xl font-semibold leading-none text-amber-500/20 transition-colors group-hover:text-amber-500/35">
                     {item.step}
                   </span>
                   <h3 className="mt-4 font-sans text-xl font-semibold">
                     {item.title}
                   </h3>
-                  <p className="mt-2 max-w-xs text-muted">{item.description}</p>
+                  <p className="mt-2 max-w-xs text-slate-400">
+                    {item.description}
+                  </p>
                 </li>
               ))}
             </ol>
@@ -211,26 +219,26 @@ export default async function Home() {
 
         <section
           id="features"
-          className="scroll-mt-24 border-t border-border bg-surface"
+          className="scroll-mt-24 border-t border-slate-800 bg-slate-900/40"
         >
           <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
             <h2 className="mb-12 max-w-xl font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
-              Why founders reach for it the night before
+              Three wedges, one coordination layer
             </h2>
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-slate-800">
               {strengths.map((item, index) => (
                 <li
                   key={item.title}
                   className="grid gap-4 py-8 sm:grid-cols-[7rem_1fr] sm:items-start sm:gap-10"
                 >
-                  <span className="font-sans text-sm font-medium tabular-nums text-accent-ink">
+                  <span className="font-sans text-sm font-medium tabular-nums text-amber-400/80">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <div>
                     <h3 className="font-sans text-xl font-semibold">
                       {item.title}
                     </h3>
-                    <p className="mt-2 max-w-2xl text-muted">
+                    <p className="mt-2 max-w-2xl text-slate-400">
                       {item.description}
                     </p>
                   </div>
@@ -240,32 +248,40 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="pricing" className="scroll-mt-24">
+        <section id="demo" className="scroll-mt-24">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
-            <div className="grid gap-10 rounded-[1.25rem] border border-border bg-accent-soft px-8 py-12 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16 lg:px-14 lg:py-14">
+            <div className="grid gap-10 rounded-[1.25rem] border border-slate-800 bg-amber-500/10 px-8 py-12 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16 lg:px-14 lg:py-14">
               <div>
                 <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Early access is free
+                  Run the 60-second demo
                 </h2>
-                <p className="mt-4 max-w-xl text-lg text-accent-ink/80">
-                  This starter ships with auth and a landing page. Swap in real
-                  plans when you&apos;re ready to charge — the narrative work
-                  stays the same.
+                <p className="mt-4 max-w-xl text-lg text-slate-300">
+                  Inject a shark tag at Collins Flat, acknowledge on the
+                  lifeguard PWA, then layer a BOM cyclone watch. Watch every
+                  channel orchestrate from the council command centre.
                 </p>
               </div>
-              <Link
-                href="/#signup"
-                className="inline-flex shrink-0 justify-center rounded-full bg-ink px-8 py-3.5 font-sans text-sm font-semibold text-white transition-colors hover:bg-ink/90"
-              >
-                Create an account
-              </Link>
+              <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
+                <Link
+                  href="/flagdown/dashboard"
+                  className="inline-flex justify-center rounded-full bg-amber-500 px-8 py-3.5 font-sans text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-400"
+                >
+                  Open command centre
+                </Link>
+                <Link
+                  href="/flagdown/lifeguard"
+                  className="inline-flex justify-center rounded-full border border-slate-600 px-8 py-3.5 font-sans text-sm font-semibold text-slate-100 transition-colors hover:bg-slate-900"
+                >
+                  Lifeguard PWA
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border px-6 py-10 text-center font-sans text-sm text-muted">
-        WitStartupPitch · T3 + Drizzle + Supabase
+      <footer className="border-t border-slate-800 px-6 py-10 text-center font-sans text-sm text-slate-500">
+        FlagDown · Northern Beaches Council pilot · The Coordination Problem
       </footer>
     </div>
   );
