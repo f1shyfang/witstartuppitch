@@ -1,34 +1,72 @@
 import type { BeachPin } from "./BeachMap";
 import { threatLevelLabel, threatLevelToColor } from "./threat-colors";
 
+const flagSwatch: Record<string, string> = {
+  green: "bg-emerald-500",
+  yellow: "bg-amber-400",
+  red: "bg-red-500",
+  black: "bg-slate-900 ring-1 ring-red-700",
+};
+
+const patrolLabel: Record<string, string> = {
+  sls: "SLS patrolled",
+  council: "Council patrolled",
+  unpatrolled: "Unpatrolled — blind spot",
+};
+
 export function BeachDetailPanel({ beach }: { beach: BeachPin | null }) {
   if (!beach) {
     return (
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-400">
-        Select a beach on the map
+      <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-6 text-center text-sm text-slate-500">
+        Select a beach on the map to inspect its status.
       </div>
     );
   }
 
+  const threatColor = threatLevelToColor(beach.threatLevel);
+  const swatch = flagSwatch[beach.flagStatus] ?? "bg-slate-600";
+
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-      <p className="text-xs uppercase tracking-widest text-slate-400">
-        Beach detail
-      </p>
-      <h2 className="mt-1 text-lg font-semibold">{beach.name}</h2>
-      <dl className="mt-4 space-y-2 text-sm">
-        <div className="flex justify-between">
-          <dt className="text-slate-400">Patrol</dt>
-          <dd className="capitalize">{beach.patrolType}</dd>
+    <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60">
+      <div className="border-b border-slate-800 p-4">
+        <p className="text-[11px] uppercase tracking-widest text-slate-500">
+          Beach detail
+        </p>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <h2 className="font-sans text-lg font-semibold tracking-tight">
+            {beach.name}
+          </h2>
+          <span
+            className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+            style={{
+              color: threatColor,
+              background: `${threatColor}1a`,
+              boxShadow: `inset 0 0 0 1px ${threatColor}40`,
+            }}
+          >
+            {threatLevelLabel(beach.threatLevel)} · L{beach.threatLevel}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-slate-400">Flag</dt>
-          <dd className="capitalize">{beach.flagStatus}</dd>
+      </div>
+      <dl className="grid grid-cols-2 divide-x divide-slate-800">
+        <div className="p-4">
+          <dt className="text-[11px] uppercase tracking-widest text-slate-500">
+            Flag
+          </dt>
+          <dd className="mt-2 flex items-center gap-2">
+            <span
+              className={`inline-block h-3.5 w-3.5 rounded-sm ${swatch}`}
+              aria-hidden
+            />
+            <span className="capitalize text-slate-200">{beach.flagStatus}</span>
+          </dd>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-slate-400">Threat</dt>
-          <dd style={{ color: threatLevelToColor(beach.threatLevel) }}>
-            {threatLevelLabel(beach.threatLevel)} (L{beach.threatLevel})
+        <div className="p-4">
+          <dt className="text-[11px] uppercase tracking-widest text-slate-500">
+            Patrol
+          </dt>
+          <dd className="mt-2 text-slate-200">
+            {patrolLabel[beach.patrolType] ?? beach.patrolType}
           </dd>
         </div>
       </dl>

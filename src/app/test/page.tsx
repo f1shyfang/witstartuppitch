@@ -52,19 +52,40 @@ export default async function TestPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-12">
-        <div className="mb-8 space-y-2">
-          <h1 className="font-sans text-3xl font-semibold tracking-tight">
-            Database test
-          </h1>
-          <p className="text-muted">
-            Rows from <code className="text-ink">witstartuppitch_post</code>
-          </p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-2">
+            <p className="font-sans text-sm font-medium text-primary">
+              Authenticated workspace
+            </p>
+            <h1 className="font-sans text-3xl font-semibold tracking-tight">
+              Database test
+            </h1>
+            <p className="text-muted">
+              Rows from{" "}
+              <code className="rounded bg-surface px-1.5 py-0.5 text-sm text-ink">
+                witstartuppitch_post
+              </code>
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-border bg-surface px-5 py-3">
+            <p className="text-[11px] uppercase tracking-widest text-muted">
+              Signed in
+            </p>
+            <p className="mt-0.5 font-sans text-sm font-medium text-ink">
+              {session.user.name ?? session.user.email}
+            </p>
+          </div>
         </div>
 
         {posts.length === 0 ? (
-          <p className="rounded-[1.25rem] border border-border bg-surface px-6 py-8 text-muted">
-            No rows in witstartuppitch_post yet.
-          </p>
+          <div className="rounded-[1.25rem] border border-dashed border-border bg-surface/60 px-6 py-12 text-center">
+            <p className="font-sans text-base font-medium text-ink">
+              No rows in witstartuppitch_post yet.
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Seed data from your backend to see it appear here.
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto rounded-[1.25rem] border border-border">
             <table className="w-full font-sans text-sm">
@@ -78,9 +99,14 @@ export default async function TestPage() {
               </thead>
               <tbody>
                 {posts.map((post) => (
-                  <tr key={post.id} className="border-b border-border last:border-0">
+                  <tr
+                    key={post.id}
+                    className="border-b border-border transition-colors last:border-0 hover:bg-surface/70"
+                  >
                     <td className="px-4 py-3 tabular-nums">{post.id}</td>
-                    <td className="px-4 py-3">{post.name}</td>
+                    <td className="px-4 py-3 font-medium text-ink">
+                      {post.name}
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs text-muted">
                       {post.createdById}
                     </td>

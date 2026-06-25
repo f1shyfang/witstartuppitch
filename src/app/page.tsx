@@ -7,18 +7,21 @@ const workflow = [
     title: "Threat signal arrives",
     description:
       "Computer vision, acoustic shark tags, or BOM weather alerts — heterogeneous inputs, one ingest layer.",
+    icon: "signal",
   },
   {
     step: "2",
     title: "Router decides in seconds",
     description:
       "AI classifies threat level, beach context, and the channel sequence — lifeguard, flags, PA, swimmer push.",
+    icon: "route",
   },
   {
     step: "3",
     title: "Actors coordinate",
     description:
       "Patrolled beaches route through lifeguards. Unpatrolled stretches hit council PA directly. All under 60 seconds.",
+    icon: "relay",
   },
 ];
 
@@ -46,14 +49,95 @@ const routes = [
     description: "Live map, threat pins, timeline feed, and demo inject controls.",
     href: "/flagdown/dashboard",
     cta: "Open dashboard",
+    icon: "dashboard",
   },
   {
     title: "Lifeguard PWA",
     description: "Mobile alert card — acknowledge, escalate, or mark false alarm.",
     href: "/flagdown/lifeguard",
     cta: "Open lifeguard view",
+    icon: "lifeguard",
   },
 ];
+
+function WorkflowIcon({
+  name,
+  className,
+}: {
+  name: string;
+  className?: string;
+}) {
+  const common = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className,
+    "aria-hidden": true,
+  };
+  switch (name) {
+    case "signal":
+      return (
+        <svg {...common}>
+          <path d="M3 12h4l3-7 4 14 3-7h4" />
+        </svg>
+      );
+    case "route":
+      return (
+        <svg {...common}>
+          <circle cx="6" cy="19" r="2.5" />
+          <circle cx="18" cy="5" r="2.5" />
+          <path d="M8.5 19H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5" />
+        </svg>
+      );
+    case "relay":
+      return (
+        <svg {...common}>
+          <path d="M12 3v6" />
+          <path d="M7 9h10l-2 4H9z" />
+          <path d="M9 13v5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-5" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+function RouteIcon({ name }: { name: string }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className: "h-5 w-5",
+    "aria-hidden": true,
+  };
+  switch (name) {
+    case "dashboard":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="9" rx="1" />
+          <rect x="14" y="3" width="7" height="5" rx="1" />
+          <rect x="14" y="12" width="7" height="9" rx="1" />
+          <rect x="3" y="16" width="7" height="5" rx="1" />
+        </svg>
+      );
+    case "lifeguard":
+      return (
+        <svg {...common}>
+          <path d="M3 13a9 9 0 1 1 18 0" />
+          <path d="M12 13l4-4" />
+          <path d="M3 13h3M18 13h3M12 22v-3" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
 
 export default function Home() {
   return (
@@ -145,16 +229,21 @@ export default function Home() {
                 <Link
                   key={route.href}
                   href={route.href}
-                  className="block rounded-xl border border-slate-800 bg-slate-950/80 p-5 transition-colors hover:border-amber-500/40 hover:bg-slate-900"
+                  className="group flex items-start gap-4 rounded-xl border border-slate-800 bg-slate-950/80 p-5 transition-colors hover:border-amber-500/40 hover:bg-slate-900"
                 >
-                  <h2 className="font-sans text-lg font-semibold text-slate-100">
-                    {route.title}
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {route.description}
-                  </p>
-                  <span className="mt-3 inline-block font-sans text-sm font-medium text-amber-400">
-                    {route.cta} →
+                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-800 bg-slate-900 text-amber-400 transition-colors group-hover:border-amber-500/50">
+                    <RouteIcon name={route.icon} />
+                  </span>
+                  <span className="flex-1">
+                    <h2 className="font-sans text-lg font-semibold text-slate-100">
+                      {route.title}
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {route.description}
+                    </p>
+                    <span className="mt-3 inline-block font-sans text-sm font-medium text-amber-400 transition-transform group-hover:translate-x-0.5">
+                      {route.cta} →
+                    </span>
                   </span>
                 </Link>
               ))}
@@ -201,11 +290,16 @@ export default function Home() {
             </div>
             <ol className="grid gap-10 lg:grid-cols-3 lg:gap-8">
               {workflow.map((item) => (
-                <li key={item.step} className="group">
-                  <span className="font-sans text-5xl font-semibold leading-none text-amber-500/20 transition-colors group-hover:text-amber-500/35">
-                    {item.step}
-                  </span>
-                  <h3 className="mt-4 font-sans text-xl font-semibold">
+                <li key={item.step} className="group relative">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-9 w-9 place-items-center rounded-lg border border-slate-800 bg-slate-900 text-amber-400 transition-colors group-hover:border-amber-500/50 group-hover:text-amber-300">
+                      <WorkflowIcon name={item.icon} className="h-4 w-4" />
+                    </span>
+                    <span className="font-sans text-sm font-medium tabular-nums text-slate-600">
+                      {String(item.step).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <h3 className="mt-5 font-sans text-xl font-semibold">
                     {item.title}
                   </h3>
                   <p className="mt-2 max-w-xs text-slate-400">
@@ -280,8 +374,21 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-800 px-6 py-10 text-center font-sans text-sm text-slate-500">
-        FlagDown · Northern Beaches Council pilot · The Coordination Problem
+      <footer className="border-t border-slate-800 px-6 py-10">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center font-sans text-sm text-slate-500 sm:flex-row sm:text-left">
+          <p>
+            Flag<span className="text-amber-400/80">Down</span> · Northern
+            Beaches Council pilot · The Coordination Problem
+          </p>
+          <div className="flex items-center gap-4">
+            <Link href="/flagdown/dashboard" className="hover:text-amber-400">
+              Command centre
+            </Link>
+            <Link href="/flagdown/lifeguard" className="hover:text-amber-400">
+              Lifeguard
+            </Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
