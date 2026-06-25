@@ -4,9 +4,11 @@ import type { CvAnalysisResult, CvBBox, CvDetection } from "~/flagdown/types/cv"
 
 /**
  * On-device shark detection using OWL-ViT zero-shot detector
- * (Xenova/owlvit-base-patch32) via Transformers.js + ONNX Runtime Web.
+ * (onnx-community/owlvit-base-patch32-ONNX) via Transformers.js + ONNX Runtime Web.
  *
- * The model is downloaded + cached on first run (~150MB fp32 / ~40MB quantized).
+ * The quantized ONNX model (~156MB) is committed under `public/models/owlvit-base-patch32/`
+ * so the demo runs fully offline — no Hugging Face download on first use.
+ *
  * Zero-shot lets us query marine-relevant classes ("shark", "person in water",
  * "surfboard", "boat") without a custom-trained checkpoint — so the demo runs
  * real ML in the browser and still detects sharks (COCO YOLOv8 has no shark class).
@@ -38,18 +40,34 @@ type OwlVitPipeline = ((
 
 let pipelinePromise: Promise<OwlVitPipeline> | null = null;
 
+/**
+ * The OWL-ViT ONNX model is committed to the repo under
+ * `public/models/owlvit-base-patch32/` (quantized, ~156MB) so the demo runs
+ * fully offline — no Hugging Face download on first use. Transformers.js
+ * resolves `<localModelPath>/<model-id>/onnx/model_quantized.onnx`.
+ */
+const LOCAL_MODEL_ID = "owlvit-base-patch32";
+const LOCAL_MODEL_PATH = "/models/";
+
 async function getDetector(): Promise<OwlVitPipeline> {
   pipelinePromise ??= (async () => {
     const { pipeline, env } = await import("@huggingface/transformers");
-    // Allow fetching remote models + don't require local model files.
-    env.allowLocalModels = false;
+    // Prefer the committed local model; only fall back to remote if missing.
+    env.allowLocalModels = true;
+    env.localModelPath = LOCAL_MODEL_PATH;
     env.allowRemoteModels = true;
 
-    const detector = (await pipeline(
-      "zero-shot-object-detection",
-      "onnx-community/owlvit-base-patch32-ONNX",
-      { device: "webgpu" as never },
-    )) as unknown as OwlVitPipeline;
+    // Prefer WebGPU when available; fall back to WASM (CPU) for browsers without it.
+    let detector: OwlVitPipeline;
+    try {
+      detector = (await pipeline("zero-shot-object-detection", LOCAL_MODEL_ID, {
+        device: "webgpu" as never,
+      }));
+    } catch {
+      detector = (await pipeline("zero-shot-object-detection", LOCAL_MODEL_ID, {
+        device: "wasm" as never,
+      }));
+    }
     return detector;
   })();
   return pipelinePromise;
