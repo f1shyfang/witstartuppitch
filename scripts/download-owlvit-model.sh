@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Download the quantized OWL-ViT ONNX model for local dev.
-# In production the model is served from Vercel Blob (NEXT_PUBLIC_OWLVIT_MODEL_BASE)
-# because the 156MB file exceeds Vercel's 100MB deploy limit.
+# Optional: download the OWL-ViT ONNX model + config for offline local dev.
+# In production the model is served from Vercel Blob (NEXT_PUBLIC_OWLVIT_MODEL_BASE).
+# In dev the app fetches from Hugging Face by default; this script is only needed
+# if you want a local copy under data/models (gitignored).
 set -euo pipefail
 
-DEST="public/models/owlvit-base-patch32"
+DEST="${1:-data/models/owlvit-base-patch32}"
 BASE="https://huggingface.co/onnx-community/owlvit-base-patch32-ONNX/resolve/main"
 
 mkdir -p "$DEST/onnx"
@@ -19,4 +20,5 @@ if [ ! -f "$DEST/onnx/model_quantized.onnx" ]; then
   curl -fL "$BASE/onnx/model_quantized.onnx" -o "$DEST/onnx/model_quantized.onnx"
 fi
 
-echo "Done. Model ready for local dev under $DEST/."
+echo "Done. Local model ready under $DEST/ (gitignored)."
+

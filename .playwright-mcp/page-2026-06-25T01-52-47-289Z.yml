@@ -1,0 +1,225 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "FlagDown Northern Beaches Council" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - generic [ref=e9]:
+            - generic [ref=e10]: FlagDown
+            - generic [ref=e11]: Northern Beaches Council
+        - navigation [ref=e12]:
+          - link "Home" [ref=e13] [cursor=pointer]:
+            - /url: /
+          - link "Dashboard" [ref=e14] [cursor=pointer]:
+            - /url: /flagdown/dashboard
+          - link "Lifeguard" [ref=e15] [cursor=pointer]:
+            - /url: /flagdown/lifeguard
+    - main [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Council command centre
+          - heading "Coast coordination" [level=2] [ref=e20]
+          - paragraph [ref=e21]: Live threat routing across patrolled & unpatrolled beaches
+        - button "Pitch mode" [ref=e22]
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - term [ref=e25]: Beaches monitored
+          - definition [ref=e26]: "5"
+          - definition [ref=e27]: Northern Beaches pilot
+        - generic [ref=e28]:
+          - term [ref=e29]: Active alerts
+          - definition [ref=e30]: "3"
+          - definition [ref=e31]: Requires coordination
+        - generic [ref=e32]:
+          - term [ref=e33]: Swimmers reachable
+          - definition [ref=e34]: "283"
+          - definition [ref=e35]: Via push + PA
+        - generic [ref=e36]:
+          - term [ref=e37]: Highest threat
+          - definition [ref=e38]: L2
+          - definition [ref=e39]: SHARK ALERT
+      - generic [ref=e40]:
+        - generic [ref=e110]:
+          - generic:
+            - generic:
+              - button [ref=e111] [cursor=pointer]
+              - button [ref=e113] [cursor=pointer]
+              - button [ref=e115] [cursor=pointer]
+              - button [ref=e117] [cursor=pointer]
+              - button [ref=e119] [cursor=pointer]
+          - generic:
+            - generic [ref=e121]:
+              - button "Zoom in" [ref=e122] [cursor=pointer]: +
+              - button "Zoom out" [ref=e123] [cursor=pointer]: −
+            - generic [ref=e124]:
+              - link "Leaflet" [ref=e125] [cursor=pointer]:
+                - /url: https://leafletjs.com
+                - img [ref=e126]
+                - text: Leaflet
+              - text: "| ©"
+              - link "OSM" [ref=e130] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: Beach detail
+              - generic [ref=e133]:
+                - heading "Manly South Steyne" [level=2] [ref=e134]
+                - generic [ref=e135]: SHARK ALERT · L2
+            - generic [ref=e136]:
+              - generic [ref=e137]:
+                - term [ref=e138]: Flag
+                - definition [ref=e139]:
+                  - generic [ref=e141]: purple
+              - generic [ref=e142]:
+                - term [ref=e143]: Patrol
+                - definition [ref=e144]: patrolled
+          - generic [ref=e46]:
+            - paragraph [ref=e47]: Beaches
+            - generic [ref=e145]:
+              - button "Dee Why Beach" [ref=e146]: Dee Why Beach
+              - button "Freshwater Beach" [ref=e148]: Freshwater Beach
+              - button "North Narrabeen" [ref=e150]: North Narrabeen
+              - button "Collins Flat" [ref=e152]: Collins Flat
+              - button "Manly South Steyne" [ref=e154]: Manly South Steyne
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - paragraph [ref=e52]: Drone POV — on-device shark classification
+              - paragraph [ref=e53]: OWL-ViT zero-shot detector · bounding boxes + lock-on targeting lines · runs in-browser
+            - generic [ref=e54]: Scanning…
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - img "Drone POV CV frame" [ref=e58]
+                - generic:
+                  - generic:
+                    - img
+                  - generic:
+                    - generic:
+                      - generic: REC
+                    - generic: CAM 01 · GOPRO
+                    - generic: INF --
+                  - generic:
+                    - generic: ALT 42m
+                    - generic: SPD 6.2 m/s
+                    - generic: HDG 247°
+                  - generic:
+                    - generic: UAV NB-07 · PATROL
+                    - generic: SCANNING
+                  - generic:
+                    - generic: FOV 84° · ZOOM 1.0x
+                    - generic: 33.8008°S 151.2828°E
+                  - img
+              - generic [ref=e59]:
+                - button "Drone frame — shark positive" [ref=e60]
+                - button "Manly beach — clear water" [ref=e61]
+                - button "Upload frame" [ref=e62]
+              - generic [ref=e63] [cursor=pointer]:
+                - checkbox "Run real on-device OWL-ViT model (downloads ~MB on first use)" [checked] [ref=e64]
+                - text: Run real on-device OWL-ViT model (downloads ~MB on first use)
+            - generic [ref=e65]:
+              - paragraph [ref=e66]: Select a sample or upload a drone frame, then run CV scan. On-device OWL-ViT returns per-detection class + confidence.
+              - paragraph [ref=e156]: Running on-device OWL-ViT inference…
+              - button "Running CV…" [disabled] [ref=e226]
+              - generic [ref=e68]:
+                - paragraph [ref=e69]: Training / model lineage
+                - list [ref=e70]:
+                  - listitem [ref=e71]:
+                    - link "Underwater animal detection for YOLOv8" [ref=e72] [cursor=pointer]:
+                      - /url: https://www.kaggle.com/datasets/cubeai/underwater-animal-detection-for-yolov8
+                    - paragraph [ref=e73]: 1,277 annotated frames — shark class included, YOLO-ready for edge deploy.
+                  - listitem [ref=e74]:
+                    - link "Shark species" [ref=e75] [cursor=pointer]:
+                      - /url: https://www.kaggle.com/datasets/larusso94/shark-species
+                    - paragraph [ref=e76]: Species-level labels for fine-tuning confidence thresholds.
+                - paragraph [ref=e77]: Related aerial (Roboflow)
+                - list [ref=e78]:
+                  - listitem [ref=e79]:
+                    - link "UAV Shark Detection" [ref=e80] [cursor=pointer]:
+                      - /url: https://universe.roboflow.com/piies-workspace/uav-shark-detection-yp282
+                  - listitem [ref=e81]:
+                    - link "marine-sharks (RF100-VL)" [ref=e82] [cursor=pointer]:
+                      - /url: https://universe.roboflow.com/rf100-vl/marine-sharks-jqnfk-skffz-iflt
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - paragraph [ref=e86]: Coordination timeline
+            - generic [ref=e87]: 3 events
+          - list [ref=e157]:
+            - listitem [ref=e158]:
+              - generic [ref=e159]:
+                - paragraph [ref=e160]: Manly South Steyne
+                - generic [ref=e161]: L2
+              - paragraph [ref=e162]: Drone CV · drone-cv-demo-fallback · 11:23:58
+              - list [ref=e163]:
+                - listitem [ref=e164]:
+                  - generic [ref=e165]: Lifeguard
+                  - generic [ref=e166]: ·
+                  - generic [ref=e167]: "Shark alert L2: possible shark sighting. Acknowledge and assess."
+                - listitem [ref=e168]:
+                  - generic [ref=e169]: Flag
+                  - generic [ref=e170]: ·
+                  - generic [ref=e171]: Downgrade flag to purple — shark sighting.
+                - listitem [ref=e172]:
+                  - generic [ref=e173]: Swimmer push
+                  - generic [ref=e174]: ·
+                  - generic [ref=e175]: Shark spotted near manly-south-steyne. Exit water calmly.
+            - listitem [ref=e176]:
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: Manly South Steyne
+                - generic [ref=e179]: L2
+              - paragraph [ref=e180]: Drone CV · drone-cv-demo-fallback · 11:23:40
+              - list [ref=e181]:
+                - listitem [ref=e182]:
+                  - generic [ref=e183]: Lifeguard
+                  - generic [ref=e184]: ·
+                  - generic [ref=e185]: "Shark alert L2: possible shark sighting. Acknowledge and assess."
+                - listitem [ref=e186]:
+                  - generic [ref=e187]: Flag
+                  - generic [ref=e188]: ·
+                  - generic [ref=e189]: Downgrade flag to purple — shark sighting.
+                - listitem [ref=e190]:
+                  - generic [ref=e191]: Swimmer push
+                  - generic [ref=e192]: ·
+                  - generic [ref=e193]: Shark spotted near manly-south-steyne. Exit water calmly.
+            - listitem [ref=e194]:
+              - generic [ref=e195]:
+                - paragraph [ref=e196]: Manly South Steyne
+                - generic [ref=e197]: L2
+              - paragraph [ref=e198]: Drone CV · drone-cv-demo-fallback · 11:23:36
+              - list [ref=e199]:
+                - listitem [ref=e200]:
+                  - generic [ref=e201]: Lifeguard
+                  - generic [ref=e202]: ·
+                  - generic [ref=e203]: "Shark alert L2: possible shark sighting. Acknowledge and assess."
+                - listitem [ref=e204]:
+                  - generic [ref=e205]: Flag
+                  - generic [ref=e206]: ·
+                  - generic [ref=e207]: Downgrade flag to purple — shark sighting.
+                - listitem [ref=e208]:
+                  - generic [ref=e209]: Swimmer push
+                  - generic [ref=e210]: ·
+                  - generic [ref=e211]: Shark spotted near manly-south-steyne. Exit water calmly.
+        - generic [ref=e90]:
+          - paragraph [ref=e91]: Demo controls
+          - paragraph [ref=e92]: Inject live threats to exercise the router.
+          - generic [ref=e93]:
+            - button "SharkSmart tag — Collins Flat Unpatrolled · council PA + push" [ref=e94]:
+              - generic [ref=e95]:
+                - generic [ref=e96]: SharkSmart tag — Collins Flat
+                - generic [ref=e97]: Unpatrolled · council PA + push
+              - generic [ref=e98]: →
+            - button "BOM cyclone watch Multi-threat escalation · L5" [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]: BOM cyclone watch
+                - generic [ref=e102]: Multi-threat escalation · L5
+              - generic [ref=e103]: →
+            - button "Reset demo Clear events & flags" [ref=e104]:
+              - generic [ref=e105]:
+                - generic [ref=e106]: Reset demo
+                - generic [ref=e107]: Clear events & flags
+              - generic [ref=e108]: →
+  - button "Open Next.js Dev Tools" [ref=e217] [cursor=pointer]:
+    - img [ref=e218]
+  - alert [ref=e109]

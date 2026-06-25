@@ -43,39 +43,38 @@ type OwlVitPipeline = ((
 let pipelinePromise: Promise<OwlVitPipeline> | null = null;
 
 /**
- * Model id and hosting. In dev the model is served from `public/models/`
- * (env.localModelPath=/models/). In production the 156MB ONNX lives on Vercel
- * Blob — `NEXT_PUBLIC_OWLVIT_MODEL_BASE` points Transformers.js at it.
+ * Model id and hosting.
+ * - Dev: fetch onnx-community/owlvit-base-patch32-ONNX from Hugging Face (the
+ *   156MB ONNX is too large to keep in public/ for Vercel deploys; browser-cached
+ *   after first fetch).
+ * - Prod: NEXT_PUBLIC_OWLVIT_MODEL_BASE points Transformers.js at Vercel Blob,
+ *   where the model is uploaded via `vercel blob put`.
  */
-const LOCAL_MODEL_ID = "owlvit-base-patch32";
-const LOCAL_MODEL_PATH = "/models/";
+const HF_MODEL_ID = "onnx-community/owlvit-base-patch32-ONNX";
+const BLOB_MODEL_ID = "owlvit-base-patch32";
 const BLOB_BASE = process.env.NEXT_PUBLIC_OWLVIT_MODEL_BASE;
+const MODEL_ID = BLOB_BASE ? BLOB_MODEL_ID : HF_MODEL_ID;
 
 async function getDetector(): Promise<OwlVitPipeline> {
   pipelinePromise ??= (async () => {
     const { pipeline, env } = await import("@huggingface/transformers");
 
+    env.allowLocalModels = false;
+    env.allowRemoteModels = true;
     if (BLOB_BASE) {
-      // Production: load the committed model from Vercel Blob.
-      env.allowLocalModels = false;
-      env.allowRemoteModels = true;
+      // Production: load from Vercel Blob.
       env.remoteHost = BLOB_BASE;
       env.remotePathTemplate = "{model}/";
-    } else {
-      // Dev: load from public/models/ (no download), fall back to HF if missing.
-      env.allowLocalModels = true;
-      env.localModelPath = LOCAL_MODEL_PATH;
-      env.allowRemoteModels = true;
     }
 
     // Prefer WebGPU when available; fall back to WASM (CPU) for browsers without it.
     let detector: OwlVitPipeline;
     try {
-      detector = (await pipeline("zero-shot-object-detection", LOCAL_MODEL_ID, {
+      detector = (await pipeline("zero-shot-object-detection", MODEL_ID, {
         device: "webgpu" as never,
       }));
     } catch {
-      detector = (await pipeline("zero-shot-object-detection", LOCAL_MODEL_ID, {
+      detector = (await pipeline("zero-shot-object-detection", MODEL_ID, {
         device: "wasm" as never,
       }));
     }

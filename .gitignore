@@ -39,9 +39,10 @@ yarn-error.log*
 # kaggle CV datasets (large; download via npm run cv:download-samples)
 /data/cv
 
-# OWL-ViT ONNX model — too large (156MB) for Vercel deploy; hosted on Vercel
-# Blob in production (NEXT_PUBLIC_OWLVIT_MODEL_BASE). Kept locally for dev.
-/public/models/owlvit-base-patch32/onnx/*.onnx
+# OWL-ViT ONNX model — 156MB, too large for Vercel deploy and not needed in the
+# repo (prod loads from Vercel Blob via NEXT_PUBLIC_OWLVIT_MODEL_BASE; dev loads
+# from Hugging Face). Optional local copy for offline dev lives here.
+/data/models
 
 # vercel
 .vercel
