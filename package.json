@@ -22,6 +22,7 @@
     "test:watch": "vitest",
     "seed:beaches": "tsx --env-file=.env src/scripts/seed-beaches.ts",
     "cv:download-samples": "bash scripts/download-kaggle-cv-samples.sh",
+    "cv:download-model": "bash scripts/download-owlvit-model.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

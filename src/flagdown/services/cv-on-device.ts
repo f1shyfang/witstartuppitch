@@ -6,8 +6,10 @@ import type { CvAnalysisResult, CvBBox, CvDetection } from "~/flagdown/types/cv"
  * On-device shark detection using OWL-ViT zero-shot detector
  * (onnx-community/owlvit-base-patch32-ONNX) via Transformers.js + ONNX Runtime Web.
  *
- * The quantized ONNX model (~156MB) is committed under `public/models/owlvit-base-patch32/`
- * so the demo runs fully offline — no Hugging Face download on first use.
+ * Model hosting:
+ * - Local dev: served from `public/models/owlvit-base-patch32/` (no download).
+ * - Vercel production: the 156MB ONNX exceeds Vercel's 100MB deploy file limit,
+ *   so it's hosted on Vercel Blob and loaded via NEXT_PUBLIC_OWLVIT_MODEL_BASE.
  *
  * Zero-shot lets us query marine-relevant classes ("shark", "person in water",
  * "surfboard", "boat") without a custom-trained checkpoint — so the demo runs
@@ -41,21 +43,30 @@ type OwlVitPipeline = ((
 let pipelinePromise: Promise<OwlVitPipeline> | null = null;
 
 /**
- * The OWL-ViT ONNX model is committed to the repo under
- * `public/models/owlvit-base-patch32/` (quantized, ~156MB) so the demo runs
- * fully offline — no Hugging Face download on first use. Transformers.js
- * resolves `<localModelPath>/<model-id>/onnx/model_quantized.onnx`.
+ * Model id and hosting. In dev the model is served from `public/models/`
+ * (env.localModelPath=/models/). In production the 156MB ONNX lives on Vercel
+ * Blob — `NEXT_PUBLIC_OWLVIT_MODEL_BASE` points Transformers.js at it.
  */
 const LOCAL_MODEL_ID = "owlvit-base-patch32";
 const LOCAL_MODEL_PATH = "/models/";
+const BLOB_BASE = process.env.NEXT_PUBLIC_OWLVIT_MODEL_BASE;
 
 async function getDetector(): Promise<OwlVitPipeline> {
   pipelinePromise ??= (async () => {
     const { pipeline, env } = await import("@huggingface/transformers");
-    // Prefer the committed local model; only fall back to remote if missing.
-    env.allowLocalModels = true;
-    env.localModelPath = LOCAL_MODEL_PATH;
-    env.allowRemoteModels = true;
+
+    if (BLOB_BASE) {
+      // Production: load the committed model from Vercel Blob.
+      env.allowLocalModels = false;
+      env.allowRemoteModels = true;
+      env.remoteHost = BLOB_BASE;
+      env.remotePathTemplate = "{model}/";
+    } else {
+      // Dev: load from public/models/ (no download), fall back to HF if missing.
+      env.allowLocalModels = true;
+      env.localModelPath = LOCAL_MODEL_PATH;
+      env.allowRemoteModels = true;
+    }
 
     // Prefer WebGPU when available; fall back to WASM (CPU) for browsers without it.
     let detector: OwlVitPipeline;
