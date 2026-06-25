@@ -1,7 +1,8 @@
 # FlagDown — Beach Safety Coordination Layer
 
 **Date:** 2026-06-23  
-**Status:** Approved  
+**Status:** Implemented (hackathon-ready demo)  
+**Last updated:** 2026-06-26  
 **Competition:** The Coordination Problem (Startup Pitch / Hackathon)
 
 ---
@@ -99,15 +100,18 @@ Detection (CV, acoustic tags) is an **input**. Council dashboard, lifeguard PWA,
 | App | Next.js 15 App Router at `/flagdown` |
 | API | tRPC + route handlers for webhooks |
 | AI | Vercel AI SDK — threat classification + routing plan |
-| CV | AI vision on uploaded clip; pre-scored fallback for demo reliability |
-| DB | Drizzle + Postgres |
-| Realtime | Supabase Realtime |
+| CV | On-device YOLOv8n + OWL-ViT via `onnxruntime-web`; GPT-4o-mini vision fallback optional |
+| DB | Drizzle + Postgres (Supabase) |
+| Realtime | Supabase Realtime broadcast + tRPC polling fallback |
 | Map | Leaflet + OpenStreetMap (no API key required for hackathon) |
+| ML training | Python 3.12 + Ultralytics YOLOv8 → ONNX export (see `ml/README.md`) |
+| Model hosting | YOLO ONNX in repo (`public/models/flagdown-yolo/`); OWL-ViT on Vercel Blob in prod |
 
-### New dependencies
+### Key dependencies
 
-- `ai`, `@ai-sdk/openai` (or Vercel AI Gateway)
-- `leaflet`, `react-leaflet`
+- `ai`, `@ai-sdk/openai` — optional server-side vision fallback
+- `leaflet`, `react-leaflet` — council map
+- `onnxruntime-web`, `@huggingface/transformers` — browser CV (client-only bundle)
 
 ---
 
@@ -157,13 +161,25 @@ Primary pitch screen.
 | Unpatrolled | Shark L2 | Council PA → swimmer push (no lifeguard) |
 | Any | BOM L5 | All channels + evacuation message |
 
-### 4. CV Pipeline
+### 4. CV Pipeline (`CvScanner` on dashboard)
 
-1. Upload clip or select pre-loaded "Manly drone footage"
-2. Extract key frame(s) → vision model classifies shark-like object + confidence
-3. On positive detection → create `ThreatEvent` → invoke threat router
+The CV scanner runs **entirely in the browser** for the primary demo path — no round-trip to a GPU server.
 
-**Demo safety:** Pre-loaded clip with known-good detection path; live upload is a bonus, not required for demo success.
+1. Select a demo sample (reef shark / jellyfish / clear reef) or upload a frame
+2. Choose model: **FlagDown YOLO** (fine-tuned), **OWL-ViT** (zero-shot), or **Preset** (known-good sample)
+3. On-device inference produces bounding boxes with a drone-POV HUD (lock-on reticles, leader lines)
+4. Client sends detections to `analyzeAndIngestCv` → server summarizes → on shark detection, creates `ThreatEvent` → threat router
+
+**Model details:**
+
+| Model | Source | Size | Classes |
+|-------|--------|------|---------|
+| FlagDown YOLOv8n | Trained on [Kaggle underwater dataset](https://www.kaggle.com/datasets/cubeai/underwater-animal-detection-for-yolov8) | ~12 MB ONNX | fish, jellyfish, penguin, auk, **shark**, starfish, stingray |
+| OWL-ViT base patch32 | Hugging Face / Vercel Blob | ~156 MB quantized ONNX | Open-vocabulary (text prompts: shark, dorsal fin, jellyfish, swimmer…) |
+
+**Fallback chain:** On-device detections → preset sample scores → GPT-4o-mini vision (if `OPENAI_API_KEY` set) → deterministic demo fallback.
+
+**Demo safety:** Preset samples and YOLO on `reef-shark.jpg` give reliable shark detections; live upload is a bonus.
 
 ---
 
@@ -226,7 +242,7 @@ Primary pitch screen.
 | Patrolled vs unpatrolled routing | Council PA hardware (UI + sound) |
 | Lifeguard PWA + ack loop | Loudspeaker API |
 | Council dashboard + Realtime timeline | Swimmer push (count on screen) |
-| CV on curated clip | |
+| On-device CV (YOLO + OWL-ViT) on curated samples | GPT-4o-mini vision on arbitrary uploads |
 
 ---
 
@@ -244,11 +260,11 @@ Primary pitch screen.
 
 ## Out of Scope
 
-- Training a shark detection model from scratch
-- Real council PA / loudspeaker hardware integration
-- Production BOM or SharkSmart API contracts
-- Consumer app-store swimmer application (simulated push count suffices)
+- Real council PA / loudspeaker hardware integration (UI + siren audio only)
+- Production BOM or SharkSmart API contracts (mock inject buttons)
+- Consumer app-store swimmer application (simulated push count on dashboard)
 - Rip current computer vision (roadmap mention only)
+- Production-grade YOLO accuracy tuning (hackathon demo uses a quick fine-tune)
 
 ---
 
@@ -292,5 +308,5 @@ Primary pitch screen.
 | Demo beaches | Manly South Steyne + Collins Flat |
 | Business model | Council-first SaaS |
 | Map library | Leaflet + OSM |
-| CV approach | Vercel AI vision + pre-scored fallback |
+| CV approach | On-device YOLOv8n + OWL-ViT; GPT-4o-mini vision fallback |
 | Product name | FlagDown |

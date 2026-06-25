@@ -1,5 +1,7 @@
 # FlagDown — our own shark / marine-danger detector
 
+Part of the [FlagDown beach coordination demo](../README.md) (`/flagdown/dashboard`). The CV scanner also supports OWL-ViT zero-shot detection alongside this model.
+
 A custom **YOLOv8n** object detector trained on real marine imagery, exported to
 ONNX (~12 MB), and run **on-device in the browser** via `onnxruntime-web`. This is
 FlagDown's own model — unlike the generic OWL-ViT zero-shot detector it sits
