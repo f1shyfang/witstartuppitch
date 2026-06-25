@@ -29,34 +29,115 @@ function boxColor(label: string, isShark: boolean) {
   return { stroke: "#94a3b8", chip: "bg-slate-600 text-white" };
 }
 
+/**
+ * Drone-HUD targeting reticle: corner brackets + leader line from the frame
+ * center crosshair to the detection centroid. Mimics the lock-on UI you see in
+ * UAV shark-surveillance feeds.
+ */
+function TargetingReticle({
+  det,
+  color,
+  locked,
+}: {
+  det: CvDetection;
+  color: string;
+  locked: boolean;
+}) {
+  const cx = (det.bbox.x + det.bbox.width / 2) * 100;
+  const cy = (det.bbox.y + det.bbox.height / 2) * 100;
+  const corner = 18;
+  const cornerSvg = (
+    <svg
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      {[
+        `M2 ${corner} L2 2 L${corner} 2`,
+        `M${100 - corner} 2 L98 2 L98 ${corner}`,
+        `M2 ${100 - corner} L2 98 L${corner} 98`,
+        `M${100 - corner} 98 L98 98 L98 ${100 - corner}`,
+      ].map((d, i) => (
+        <path
+          key={i}
+          d={d}
+          stroke={color}
+          strokeWidth={locked ? 2.2 : 1.4}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+    </svg>
+  );
+  return (
+    <>
+      {cornerSvg}
+      {locked ? (
+        <svg
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <line
+            x1="50"
+            y1="50"
+            x2={cx}
+            y2={cy}
+            stroke={color}
+            strokeWidth={1}
+            strokeDasharray="3 3"
+            vectorEffect="non-scaling-stroke"
+            opacity={0.7}
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={1.4}
+            stroke={color}
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+            fill={color}
+          />
+        </svg>
+      ) : null}
+    </>
+  );
+}
+
 function DetectionBox({
   det,
   animate,
+  locked,
 }: {
   det: CvDetection;
   animate: boolean;
+  locked: boolean;
 }) {
   const isShark = isSharkLabel(det.label);
   const c = boxColor(det.label, isShark);
   const pct = Math.round(det.score * 100);
   return (
     <div
-      className={`pointer-events-none absolute rounded-sm border-2 transition-all duration-300 ${
+      className={`pointer-events-none absolute rounded-sm border transition-all duration-300 ${
         animate ? "opacity-100" : "opacity-0"
-      }`}
+      } ${locked ? "border-2" : "border"}`}
       style={{
         left: `${det.bbox.x * 100}%`,
         top: `${det.bbox.y * 100}%`,
         width: `${det.bbox.width * 100}%`,
         height: `${det.bbox.height * 100}%`,
         borderColor: c.stroke,
-        background: `${c.stroke}14`,
-        boxShadow: isShark ? `0 0 0 1px ${c.stroke}55` : undefined,
+        background: `${c.stroke}10`,
+        boxShadow: locked ? `0 0 10px 0 ${c.stroke}66` : undefined,
       }}
     >
+      <TargetingReticle det={det} color={c.stroke} locked={locked} />
       <span
         className={`absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold ${c.chip}`}
       >
+        {locked ? "● " : ""}
         {det.label} · {pct}%
       </span>
     </div>
@@ -70,10 +151,17 @@ function DetectionOverlay({
   detections: CvDetection[];
   animate: boolean;
 }) {
+  // Highest-scoring shark detection gets the "locked" reticle + leader line.
+  const lockedIdx = detections.findIndex((d) => isSharkLabel(d.label));
   return (
     <>
       {detections.map((det, i) => (
-        <DetectionBox key={`${det.label}-${i}`} det={det} animate={animate} />
+        <DetectionBox
+          key={`${det.label}-${i}`}
+          det={det}
+          animate={animate}
+          locked={i === lockedIdx}
+        />
       ))}
     </>
   );
@@ -126,11 +214,11 @@ export function CvScanner({
   useEffect(() => {
     if (!useOnDevice) return;
     setModelState("loading-model");
-    setModelStatus("Downloading OWL-ViT ONNX model…");
+    setModelStatus("Loading local OWL-ViT ONNX model…");
     preloadOnDeviceCv()
       .then(() => {
         setModelState("ready");
-        setModelStatus("On-device OWL-ViT ready");
+        setModelStatus("On-device OWL-ViT ready (local model)");
       })
       .catch(() => {
         setModelState("idle");
@@ -229,10 +317,10 @@ export function CvScanner({
       <div className="mb-3 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-widest text-slate-400">
-            Drone CV — on-device edge inference
+            Drone POV — on-device shark classification
           </p>
           <p className="mt-1 text-sm text-slate-300">
-            OWL-ViT zero-shot detector · runs in-browser via ONNX Runtime Web
+            OWL-ViT zero-shot detector · bounding boxes + lock-on targeting lines · runs in-browser
           </p>
         </div>
         <span
@@ -253,11 +341,70 @@ export function CvScanner({
           <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-slate-950 ring-1 ring-slate-800">
             <Image
               src={displayImage}
-              alt="CV frame"
+              alt="Drone POV CV frame"
               fill
               className="object-cover"
               unoptimized
             />
+            {/* Drone HUD overlay */}
+            <div className="pointer-events-none absolute inset-0 font-mono text-[10px] text-emerald-300/90">
+              {/* Center crosshair */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden>
+                  <circle
+                    cx="23"
+                    cy="23"
+                    r="14"
+                    stroke="#34d399"
+                    strokeWidth="1"
+                    fill="none"
+                    opacity="0.5"
+                  />
+                  <line x1="23" y1="2" x2="23" y2="14" stroke="#34d399" strokeWidth="1" opacity="0.7" />
+                  <line x1="23" y1="32" x2="23" y2="44" stroke="#34d399" strokeWidth="1" opacity="0.7" />
+                  <line x1="2" y1="23" x2="14" y2="23" stroke="#34d399" strokeWidth="1" opacity="0.7" />
+                  <line x1="32" y1="23" x2="44" y2="23" stroke="#34d399" strokeWidth="1" opacity="0.7" />
+                </svg>
+              </div>
+              {/* Top-left telemetry */}
+              <div className="absolute left-2 top-2 space-y-0.5 rounded-sm bg-black/30 px-1.5 py-1 leading-tight">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+                  <span className="text-red-300">REC</span>
+                </div>
+                <div>CAM 01 · GOPRO</div>
+                <div>{analysis?.latencyMs ? `INF ${analysis.latencyMs}ms` : "INF --"}</div>
+              </div>
+              {/* Top-right telemetry */}
+              <div className="absolute right-2 top-2 space-y-0.5 rounded-sm bg-black/30 px-1.5 py-1 text-right leading-tight">
+                <div>ALT 42m</div>
+                <div>SPD 6.2 m/s</div>
+                <div>HDG 247°</div>
+              </div>
+              {/* Bottom-left: drone label / mission */}
+              <div className="absolute bottom-2 left-2 rounded-sm bg-black/30 px-1.5 py-1 leading-tight">
+                <div>UAV NB-07 · PATROL</div>
+                <div className="text-emerald-400/70">
+                  {analysis?.sharkDetected ? "TARGET LOCKED" : "SCANNING"}
+                </div>
+              </div>
+              {/* Bottom-right: frame counter / FOV */}
+              <div className="absolute bottom-2 right-2 rounded-sm bg-black/30 px-1.5 py-1 text-right leading-tight">
+                <div>FOV 84° · ZOOM 1.0x</div>
+                <div className="text-emerald-400/70">33.8008°S 151.2828°E</div>
+              </div>
+              {/* Edge corner ticks */}
+              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+                {[
+                  "M1 4 L1 1 L4 1",
+                  "M96 1 L99 1 L99 4",
+                  "M1 96 L1 99 L4 99",
+                  "M96 99 L99 99 L99 96",
+                ].map((d, i) => (
+                  <path key={i} d={d} stroke="#34d399" strokeWidth="0.6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.6" />
+                ))}
+              </svg>
+            </div>
             {detections.length > 0 ? (
               <DetectionOverlay
                 detections={visibleDetections}
@@ -309,7 +456,7 @@ export function CvScanner({
               onChange={(e) => setUseOnDevice(e.target.checked)}
               className="accent-amber-500"
             />
-            Run real on-device OWL-ViT model (downloads ~MB on first use)
+            Run real on-device OWL-ViT model (local ONNX, ~156MB committed to repo)
           </label>
         </div>
 
