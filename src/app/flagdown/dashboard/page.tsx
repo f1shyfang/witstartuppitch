@@ -4,12 +4,18 @@ import dynamic from "next/dynamic";
 import { useMemo, useRef, useState } from "react";
 import type { BeachPin } from "../_components/BeachMap";
 import { BeachDetailPanel } from "../_components/BeachDetailPanel";
-import { CvScanner } from "../_components/CvScanner";
 import { DemoControls } from "../_components/DemoControls";
 import { TimelineFeed } from "../_components/TimelineFeed";
 import { useFlagdownRealtime } from "../_components/useFlagdownRealtime";
 import { threatLevelLabel, threatLevelToColor } from "../_components/threat-colors";
 import { api } from "~/trpc/react";
+
+// Client-only: pulls in @huggingface/transformers + onnxruntime-web, which must
+// not be bundled into the server function (it would exceed Vercel's 250MB limit).
+const CvScanner = dynamic(
+  () => import("../_components/CvScanner").then((m) => m.CvScanner),
+  { ssr: false },
+);
 
 const BeachMap = dynamic(
   () => import("../_components/BeachMap").then((m) => m.BeachMap),
