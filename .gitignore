@@ -36,6 +36,9 @@ yarn-error.log*
 .env
 .env*.local
 
+# kaggle CV datasets (large; download via npm run cv:download-samples)
+/data/cv
+
 # vercel
 .vercel
 

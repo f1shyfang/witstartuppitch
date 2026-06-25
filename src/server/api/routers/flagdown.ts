@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { analyzeSharkImage } from "~/flagdown/services/cv-analyze";
 import { ingestThreat } from "~/flagdown/services/threat-ingest";
+import { cvDetectionSchema } from "~/flagdown/types/cv";
 import {
   createTRPCRouter,
   publicProcedure,
@@ -98,12 +99,14 @@ export const flagdownRouter = createTRPCRouter({
         beachId: z.string().default("manly-south-steyne"),
         imageBase64: z.string().optional(),
         sampleId: z.string().optional(),
+        clientDetections: z.array(cvDetectionSchema).optional(),
       }),
     )
     .mutation(async ({ input }) => {
       const analysis = await analyzeSharkImage({
         imageBase64: input.imageBase64,
         sampleId: input.sampleId,
+        clientDetections: input.clientDetections,
       });
       if (!analysis.sharkDetected) {
         return { ingested: false as const, analysis };

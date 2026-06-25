@@ -27,6 +27,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.74",
     "@auth/drizzle-adapter": "^1.7.2",
+    "@huggingface/transformers": "^4.2.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
     "@t3-oss/env-nextjs": "^0.12.0",
