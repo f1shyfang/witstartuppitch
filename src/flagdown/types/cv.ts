@@ -7,11 +7,17 @@ export const cvBBoxSchema = z.object({
   height: z.number().min(0).max(1),
 });
 
+/** How a detected class maps onto FlagDown's beach-safety danger model. */
+export const dangerLevelSchema = z.enum(["high", "moderate", "none"]);
+export type DangerLevel = z.infer<typeof dangerLevelSchema>;
+
 export const cvDetectionSchema = z.object({
   label: z.string(),
   /** detection confidence 0..1 */
   score: z.number().min(0).max(1),
   bbox: cvBBoxSchema,
+  /** danger class for this detection (custom YOLO model); omitted by zero-shot */
+  danger: dangerLevelSchema.optional(),
 });
 
 export const cvAnalysisResultSchema = z.object({
@@ -24,11 +30,14 @@ export const cvAnalysisResultSchema = z.object({
   /** all detections found in frame, with per-box label + confidence */
   detections: z.array(cvDetectionSchema).default([]),
   model: z.enum([
+    "flagdown-yolov8n",
     "owlvit-base-patch32",
     "gpt-4o-mini",
     "preset",
     "demo-fallback",
   ]),
+  /** highest danger level present in the frame (custom YOLO model) */
+  topDanger: dangerLevelSchema.optional(),
   datasetRef: z.string().optional(),
   /** inference latency in ms (real models only) */
   latencyMs: z.number().int().nonnegative().optional(),

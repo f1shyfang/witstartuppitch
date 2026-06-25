@@ -23,6 +23,8 @@
     "seed:beaches": "tsx --env-file=.env src/scripts/seed-beaches.ts",
     "cv:download-samples": "bash scripts/download-kaggle-cv-samples.sh",
     "cv:download-model": "bash scripts/download-owlvit-model.sh",
+    "ml:train": "data/ml/venv/bin/python ml/train_flagdown_yolo.py",
+    "ml:demo-frames": "data/ml/venv/bin/python ml/make_demo_frames.py",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -41,6 +43,7 @@
     "leaflet": "^1.9.4",
     "next": "^15.2.3",
     "next-auth": "5.0.0-beta.25",
+    "onnxruntime-web": "^1.27.0",
     "postgres": "^3.4.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -1,0 +1,32 @@
+{
+  "name": "flagdown-yolov8n",
+  "task": "detection",
+  "framework": "ultralytics-yolov8",
+  "imgsz": 640,
+  "opset": 12,
+  "names": [
+    "fish",
+    "jellyfish",
+    "penguin",
+    "auk",
+    "shark",
+    "starfish",
+    "stingray"
+  ],
+  "danger": {
+    "shark": "high",
+    "stingray": "moderate",
+    "jellyfish": "moderate",
+    "fish": "none",
+    "penguin": "none",
+    "auk": "none",
+    "starfish": "none"
+  },
+  "dangerClasses": [
+    "shark",
+    "stingray",
+    "jellyfish"
+  ],
+  "trainedOn": "kaggle:cubeai/underwater-animal-detection-for-yolov8",
+  "outputLayout": "[1, 4+nc, 8400] (xywh + per-class scores, transpose then NMS)"
+}

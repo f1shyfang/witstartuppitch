@@ -22,7 +22,7 @@ export const KAGGLE_CV_DATASETS = [
       "stingray",
     ],
     pitchLine:
-      "1,277 annotated frames — shark class included, YOLO-ready for edge deploy.",
+      "1,277 annotated frames — shark class included. FlagDown YOLOv8n is trained on this set.",
   },
   {
     id: "shark-species",

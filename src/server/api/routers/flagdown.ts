@@ -100,6 +100,9 @@ export const flagdownRouter = createTRPCRouter({
         imageBase64: z.string().optional(),
         sampleId: z.string().optional(),
         clientDetections: z.array(cvDetectionSchema).optional(),
+        clientModel: z
+          .enum(["flagdown-yolov8n", "owlvit-base-patch32"])
+          .optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -107,6 +110,7 @@ export const flagdownRouter = createTRPCRouter({
         imageBase64: input.imageBase64,
         sampleId: input.sampleId,
         clientDetections: input.clientDetections,
+        clientModel: input.clientModel,
       });
       if (!analysis.sharkDetected) {
         return { ingested: false as const, analysis };

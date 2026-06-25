@@ -19,10 +19,16 @@ describe("CV samples", () => {
   it("returns negative preset for clear-water sample", async () => {
     const result = await analyzeSharkImage({ sampleId: "clear-water" });
     expect(result.sharkDetected).toBe(false);
-    // clear-water preset still has swimmer/surfer detections
     expect(result.detections.length).toBeGreaterThan(0);
     const hasShark = result.detections.some((d) => /shark/i.test(d.label));
     expect(hasShark).toBe(false);
+  });
+
+  it("returns shark positive preset for reef-shark sample with danger tags", async () => {
+    const result = await analyzeSharkImage({ sampleId: "reef-shark" });
+    expect(result.sharkDetected).toBe(true);
+    expect(result.topDanger).toBe("high");
+    expect(result.detections.some((d) => d.danger === "high")).toBe(true);
   });
 
   it("getCvSampleById finds samples", () => {
@@ -74,6 +80,30 @@ describe("analyzeSharkImage — client on-device detections path", () => {
       clientDetections: [weakShark, swimmerDet],
     });
     expect(result.sharkDetected).toBe(false);
+  });
+
+  it("uses FlagDown YOLO model id and danger when clientModel is set", async () => {
+    const yoloShark: CvDetection = {
+      label: "shark",
+      score: 0.91,
+      bbox: { x: 0.5, y: 0.5, width: 0.2, height: 0.1 },
+      danger: "high",
+    };
+    const jelly: CvDetection = {
+      label: "jellyfish",
+      score: 0.55,
+      bbox: { x: 0.2, y: 0.2, width: 0.1, height: 0.1 },
+      danger: "moderate",
+    };
+    const result = await analyzeSharkImage({
+      clientDetections: [yoloShark, jelly],
+      clientModel: "flagdown-yolov8n",
+    });
+    expect(result.model).toBe("flagdown-yolov8n");
+    expect(result.datasetRef).toBe("kaggle/underwater-yolov8");
+    expect(result.sharkDetected).toBe(true);
+    expect(result.topDanger).toBe("high");
+    expect(result.summary).toMatch(/FlagDown YOLO/i);
   });
 
   it("demo-fallback carries detections when no input provided", async () => {

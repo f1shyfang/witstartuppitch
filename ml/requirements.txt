@@ -1,0 +1,8 @@
+# FlagDown YOLO training stack (Python 3.12, Apple Silicon / CUDA / CPU).
+# Install into a venv:
+#   python3.12 -m venv data/ml/venv
+#   data/ml/venv/bin/pip install -r ml/requirements.txt
+ultralytics>=8.3.0
+onnx>=1.16.0
+onnxruntime>=1.18.0
+onnxslim>=0.1.34

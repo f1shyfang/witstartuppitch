@@ -44,6 +44,14 @@ yarn-error.log*
 # from Hugging Face). Optional local copy for offline dev lives here.
 /data/models
 
+# FlagDown YOLO training workspace: venv + ultralytics runs (large, regenerable).
+# Training scripts live in /ml; the exported ONNX is committed to public/models.
+/data/ml
+
+# Ultralytics pretrained checkpoint + stray run dirs (downloaded during train)
+yolov8n.pt
+/runs
+
 # vercel
 .vercel
 

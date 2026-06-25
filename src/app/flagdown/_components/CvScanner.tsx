@@ -13,18 +13,32 @@ import {
   preloadOnDeviceCv,
   runOnDeviceCv,
 } from "~/flagdown/services/cv-on-device";
+import {
+  preloadYoloOnDeviceCv,
+  runYoloOnDeviceCv,
+} from "~/flagdown/services/cv-yolo-on-device";
 import { api } from "~/trpc/react";
+
+type CvModel = "yolo" | "owlvit" | "preset";
 
 const SHARK_LABEL_RE = /shark|dorsal fin/i;
 function isSharkLabel(label: string) {
   return SHARK_LABEL_RE.test(label);
 }
 
-function boxColor(label: string, isShark: boolean) {
-  if (isShark) return { stroke: "#f59e0b", chip: "bg-amber-500 text-black" };
-  if (/person|swimmer|surf/i.test(label))
+/** A detection is a primary threat if it's high-danger (our YOLO) or shark-like. */
+function isPrimaryThreat(det: CvDetection) {
+  return det.danger === "high" || isSharkLabel(det.label);
+}
+
+function boxColor(det: CvDetection) {
+  if (det.danger === "high" || isSharkLabel(det.label))
+    return { stroke: "#f59e0b", chip: "bg-amber-500 text-black" };
+  if (det.danger === "moderate")
+    return { stroke: "#fb923c", chip: "bg-orange-500 text-black" };
+  if (/person|swimmer|surf/i.test(det.label))
     return { stroke: "#38bdf8", chip: "bg-sky-500 text-black" };
-  if (/boat/i.test(label))
+  if (/boat/i.test(det.label))
     return { stroke: "#a78bfa", chip: "bg-violet-500 text-white" };
   return { stroke: "#94a3b8", chip: "bg-slate-600 text-white" };
 }
@@ -115,8 +129,7 @@ function DetectionBox({
   animate: boolean;
   locked: boolean;
 }) {
-  const isShark = isSharkLabel(det.label);
-  const c = boxColor(det.label, isShark);
+  const c = boxColor(det);
   const pct = Math.round(det.score * 100);
   return (
     <div
@@ -151,8 +164,8 @@ function DetectionOverlay({
   detections: CvDetection[];
   animate: boolean;
 }) {
-  // Highest-scoring shark detection gets the "locked" reticle + leader line.
-  const lockedIdx = detections.findIndex((d) => isSharkLabel(d.label));
+  // Highest-scoring primary threat gets the "locked" reticle + leader line.
+  const lockedIdx = detections.findIndex(isPrimaryThreat);
   return (
     <>
       {detections.map((det, i) => (
@@ -167,9 +180,13 @@ function DetectionOverlay({
   );
 }
 
-function confidenceBar(shark: boolean, conf: number) {
+function confidenceBar(shark: boolean, conf: number, moderate = false) {
   const pct = Math.round(conf * 100);
-  const color = shark ? "bg-amber-500" : "bg-emerald-500";
+  const color = shark
+    ? "bg-amber-500"
+    : moderate
+      ? "bg-orange-500"
+      : "bg-emerald-500";
   return (
     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
       <div
@@ -203,28 +220,43 @@ export function CvScanner({
   >("idle");
   const [modelStatus, setModelStatus] = useState<string>("");
   const [animateBoxes, setAnimateBoxes] = useState(false);
-  const [useOnDevice, setUseOnDevice] = useState(true);
+  const [cvModel, setCvModel] = useState<CvModel>("yolo");
+  const useOnDevice = cvModel !== "preset";
 
   const selectedSample =
     CV_DEMO_SAMPLES.find((s) => s.id === selectedSampleId) ?? CV_DEMO_SAMPLES[0]!;
 
   const displayImage = previewUrl ?? selectedSample.imagePath;
 
-  // Pre-warm the on-device model on mount (lazy; non-blocking).
+  // Pre-warm the selected on-device model (lazy; non-blocking).
   useEffect(() => {
-    if (!useOnDevice) return;
+    if (cvModel === "preset") {
+      setModelState("idle");
+      setModelStatus("");
+      return;
+    }
+    const isYolo = cvModel === "yolo";
     setModelState("loading-model");
-    setModelStatus("Loading local OWL-ViT ONNX model…");
-    preloadOnDeviceCv()
+    setModelStatus(
+      isYolo
+        ? "Loading FlagDown YOLO (our ONNX, ~12MB)…"
+        : "Loading OWL-ViT ONNX model…",
+    );
+    const preload = isYolo ? preloadYoloOnDeviceCv() : preloadOnDeviceCv();
+    preload
       .then(() => {
         setModelState("ready");
-        setModelStatus("On-device OWL-ViT ready (local model)");
+        setModelStatus(
+          isYolo
+            ? "FlagDown YOLO ready (custom-trained, on-device)"
+            : "On-device OWL-ViT ready",
+        );
       })
       .catch(() => {
         setModelState("idle");
         setModelStatus("On-device model unavailable — will use preset/fallback");
       });
-  }, [useOnDevice]);
+  }, [cvModel]);
 
   const analyzeMutation = api.flagdown.analyzeAndIngestCv.useMutation({
     onSuccess: (data) => {
@@ -263,20 +295,28 @@ export function CvScanner({
 
   const runAnalysis = async () => {
     if (useOnDevice) {
+      const isYolo = cvModel === "yolo";
       setModelState("inferring");
-      setModelStatus("Running on-device OWL-ViT inference…");
+      setModelStatus(
+        isYolo
+          ? "Running FlagDown YOLO inference…"
+          : "Running on-device OWL-ViT inference…",
+      );
       try {
-        const result = await runOnDeviceCv(displayImage);
+        const result = isYolo
+          ? await runYoloOnDeviceCv(displayImage)
+          : await runOnDeviceCv(displayImage);
         setLastAnalysis(result);
         setAnimateBoxes(false);
         requestAnimationFrame(() => setAnimateBoxes(true));
         analyzeMutation.mutate({
           beachId,
           clientDetections: result.detections,
+          clientModel: isYolo ? "flagdown-yolov8n" : "owlvit-base-patch32",
         });
         setModelState("ready");
         setModelStatus(
-          `On-device · ${result.latencyMs ?? "?"}ms · ${result.detections.length} objects`,
+          `${isYolo ? "FlagDown YOLO" : "OWL-ViT"} · ${result.latencyMs ?? "?"}ms · ${result.detections.length} objects`,
         );
         return;
       } catch {
@@ -306,7 +346,10 @@ export function CvScanner({
         ]
       : []);
   const visibleDetections = analysis?.sharkDetected
-    ? detections.filter((d) => isSharkLabel(d.label) || d.score >= 0.25)
+    ? detections.filter(
+        (d) =>
+          isPrimaryThreat(d) || (d.danger ?? "none") !== "none" || d.score >= 0.25,
+      )
     : detections;
 
   const scanning =
@@ -317,10 +360,14 @@ export function CvScanner({
       <div className="mb-3 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-widest text-slate-400">
-            Drone POV — on-device shark classification
+            Drone POV — on-device shark + danger detection
           </p>
           <p className="mt-1 text-sm text-slate-300">
-            OWL-ViT zero-shot detector · bounding boxes + lock-on targeting lines · runs in-browser
+            {cvModel === "yolo"
+              ? "FlagDown YOLOv8 (our model) · trained on marine imagery · boxes + lock-on lines · in-browser"
+              : cvModel === "owlvit"
+                ? "OWL-ViT zero-shot detector · boxes + lock-on targeting lines · in-browser"
+                : "Curated preset / server fallback · boxes + lock-on lines"}
           </p>
         </div>
         <span
@@ -449,15 +496,35 @@ export function CvScanner({
             />
           </div>
 
-          <label className="mt-3 flex cursor-pointer items-center gap-2 text-xs text-slate-400">
-            <input
-              type="checkbox"
-              checked={useOnDevice}
-              onChange={(e) => setUseOnDevice(e.target.checked)}
-              className="accent-amber-500"
-            />
-            Run real on-device OWL-ViT model (local ONNX, ~156MB committed to repo)
-          </label>
+          <div className="mt-3">
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-slate-500">
+              Detection model
+            </p>
+            <div className="inline-flex flex-wrap gap-1 rounded-lg bg-slate-950/60 p-1">
+              {(
+                [
+                  { id: "yolo", label: "FlagDown YOLO", hint: "ours · ~12MB" },
+                  { id: "owlvit", label: "OWL-ViT", hint: "zero-shot · 156MB" },
+                  { id: "preset", label: "Preset", hint: "server" },
+                ] as { id: CvModel; label: string; hint: string }[]
+              ).map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setCvModel(m.id)}
+                  className={`rounded-md px-2.5 py-1 text-xs transition-colors ${
+                    cvModel === m.id
+                      ? "bg-amber-600 text-white"
+                      : "text-slate-300 hover:bg-slate-800"
+                  }`}
+                  title={m.hint}
+                >
+                  {m.label}
+                  <span className="ml-1 text-[9px] opacity-70">{m.hint}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -466,12 +533,27 @@ export function CvScanner({
               className={`rounded-lg border p-3 text-sm ${
                 analysis.sharkDetected
                   ? "border-amber-600/50 bg-amber-950/30"
-                  : "border-emerald-800/50 bg-emerald-950/20"
+                  : analysis.topDanger === "moderate"
+                    ? "border-orange-600/40 bg-orange-950/20"
+                    : "border-emerald-800/50 bg-emerald-950/20"
               }`}
             >
               <div className="flex items-center justify-between">
-                <p className="font-medium">
-                  {analysis.sharkDetected ? "Shark detected" : "All clear"}
+                <p className="flex items-center gap-2 font-medium">
+                  {analysis.sharkDetected
+                    ? "Shark detected"
+                    : analysis.topDanger === "moderate"
+                      ? "Marine hazard"
+                      : "All clear"}
+                  {analysis.sharkDetected ? (
+                    <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-black">
+                      Danger
+                    </span>
+                  ) : analysis.topDanger === "moderate" ? (
+                    <span className="rounded bg-orange-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-black">
+                      Caution
+                    </span>
+                  ) : null}
                   {" · "}
                   {(analysis.confidence * 100).toFixed(0)}%
                 </p>
@@ -480,7 +562,11 @@ export function CvScanner({
                   {analysis.model}
                 </span>
               </div>
-              {confidenceBar(analysis.sharkDetected, analysis.confidence)}
+              {confidenceBar(
+                analysis.sharkDetected,
+                analysis.confidence,
+                analysis.topDanger === "moderate",
+              )}
               <p className="mt-2 text-xs text-slate-300">{analysis.summary}</p>
 
               {analysis.detections.length > 0 ? (
@@ -492,9 +578,20 @@ export function CvScanner({
                     >
                       <span className="flex items-center gap-1.5 text-slate-300">
                         <span
-                          className={`inline-block h-2 w-2 rounded-sm ${isSharkLabel(d.label) ? "bg-amber-400" : "bg-sky-400"}`}
+                          className={`inline-block h-2 w-2 rounded-sm ${
+                            isPrimaryThreat(d)
+                              ? "bg-amber-400"
+                              : d.danger === "moderate"
+                                ? "bg-orange-400"
+                                : "bg-sky-400"
+                          }`}
                         />
                         {d.label}
+                        {d.danger === "moderate" ? (
+                          <span className="text-[9px] uppercase text-orange-300">
+                            hazard
+                          </span>
+                        ) : null}
                       </span>
                       <span className="tabular-nums text-slate-400">
                         {(d.score * 100).toFixed(0)}%
@@ -522,8 +619,10 @@ export function CvScanner({
             </div>
           ) : (
             <p className="text-sm text-slate-400">
-              Select a sample or upload a drone frame, then run CV scan. On-device
-              OWL-ViT returns per-detection class + confidence.
+              Select a sample or upload a drone frame, then run CV scan.
+              {cvModel === "yolo"
+                ? " FlagDown's own YOLOv8 returns per-detection class, confidence + danger level."
+                : " The on-device model returns per-detection class + confidence."}
             </p>
           )}
 
@@ -544,6 +643,11 @@ export function CvScanner({
             <p className="text-[10px] uppercase tracking-widest text-slate-500">
               Training / model lineage
             </p>
+            <p className="mt-1 text-[11px] text-slate-400">
+              <span className="font-medium text-amber-300">FlagDown YOLOv8n</span>{" "}
+              — our own detector, fine-tuned on the underwater set below and
+              exported to ONNX for in-browser inference.
+            </p>
             <ul className="mt-2 space-y-2">
               {KAGGLE_CV_DATASETS.map((ds) => (
                 <li key={ds.id} className="text-xs">
@@ -555,6 +659,11 @@ export function CvScanner({
                   >
                     {ds.name}
                   </a>
+                  {ds.id === "underwater-yolov8" ? (
+                    <span className="ml-1 rounded bg-emerald-900/60 px-1 py-0.5 text-[9px] uppercase text-emerald-300">
+                      trained
+                    </span>
+                  ) : null}
                   <p className="text-slate-500">{ds.pitchLine}</p>
                 </li>
               ))}
