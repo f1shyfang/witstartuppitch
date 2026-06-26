@@ -356,13 +356,11 @@ export function CvScanner({
     analyzeMutation.isPending || modelState === "inferring";
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+    <div className="fd-panel p-4">
       <div className="mb-3 flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-slate-400">
-            Drone POV — on-device shark + danger detection
-          </p>
-          <p className="mt-1 text-sm text-slate-300">
+          <p className="fd-label">Drone POV — on-device detection</p>
+          <p className="mt-1 text-sm text-[var(--fd-muted)]">
             {cvModel === "yolo"
               ? "FlagDown YOLOv8 (our model) · trained on marine imagery · boxes + lock-on lines · in-browser"
               : cvModel === "owlvit"

@@ -1,0 +1,67 @@
+/* FlagDown ops console — scoped to .flagdown-app */
+
+.flagdown-app {
+  --fd-bg: oklch(0.13 0.022 238);
+  --fd-surface: oklch(0.17 0.028 236);
+  --fd-elevated: oklch(0.21 0.032 234);
+  --fd-border: oklch(0.29 0.035 232);
+  --fd-ink: oklch(0.93 0.012 230);
+  --fd-muted: oklch(0.58 0.028 235);
+  --fd-accent: oklch(0.74 0.15 62);
+  --fd-accent-ink: oklch(0.18 0.04 62);
+  --fd-live: oklch(0.68 0.19 152);
+  --fd-danger: oklch(0.62 0.22 25);
+  --fd-caution: oklch(0.72 0.16 55);
+
+  background-color: var(--fd-bg);
+  color: var(--fd-ink);
+  font-family: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
+}
+
+.flagdown-app ::selection {
+  background: oklch(0.74 0.15 62 / 0.35);
+}
+
+.fd-panel {
+  background: var(--fd-surface);
+  border: 1px solid var(--fd-border);
+  border-radius: 10px;
+}
+
+.fd-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--fd-muted);
+  letter-spacing: 0.01em;
+}
+
+.fd-live-pulse {
+  animation: fd-live-pulse 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes fd-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+}
+
+@keyframes fd-scan {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fd-live-pulse {
+    animation: none;
+  }
+}

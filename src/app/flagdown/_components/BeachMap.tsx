@@ -54,7 +54,7 @@ export function BeachMap({
     <MapContainer
       center={[-33.78, 151.29]}
       zoom={12}
-      className="h-full w-full rounded-xl"
+      className="h-full w-full"
       scrollWheelZoom
     >
       <TileLayer

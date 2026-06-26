@@ -22,17 +22,17 @@ const channelLabels: Record<string, string> = {
 
 const channelStyles: Record<string, string> = {
   lifeguard_push: "text-sky-300",
-  flag_downgrade: "text-amber-300",
+  flag_downgrade: "text-[var(--fd-caution)]",
   swimmer_push: "text-violet-300",
   council_pa: "text-rose-300",
 };
 
 function levelColor(level: number) {
-  if (level >= 5) return "#111827";
-  if (level >= 3) return "#dc2626";
-  if (level >= 2) return "#d97706";
-  if (level >= 1) return "#ca8a04";
-  return "#16a34a";
+  if (level >= 5) return "var(--fd-bg)";
+  if (level >= 3) return "var(--fd-danger)";
+  if (level >= 2) return "var(--fd-caution)";
+  if (level >= 1) return "oklch(0.78 0.14 85)";
+  return "var(--fd-live)";
 }
 
 const typeLabels: Record<string, string> = {
@@ -43,64 +43,83 @@ const typeLabels: Record<string, string> = {
 
 export function TimelineFeed({ events }: { events: TimelineEvent[] }) {
   return (
-    <div className="flex max-h-80 flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60">
-      <div className="flex items-center justify-between border-b border-slate-800 p-4">
-        <p className="text-[11px] uppercase tracking-widest text-slate-500">
-          Coordination timeline
-        </p>
-        <span className="text-[11px] tabular-nums text-slate-500">
+    <div className="fd-panel flex max-h-[min(28rem,50vh)] flex-col overflow-hidden">
+      <div className="flex items-center justify-between border-b border-[var(--fd-border)] px-4 py-3">
+        <div>
+          <p className="fd-label">Coordination log</p>
+          <p className="mt-0.5 text-sm text-[var(--fd-muted)]">
+            Router decisions and channel delivery
+          </p>
+        </div>
+        <span className="rounded-md bg-[var(--fd-elevated)] px-2 py-1 text-xs tabular-nums text-[var(--fd-muted)]">
           {events.length} event{events.length === 1 ? "" : "s"}
         </span>
       </div>
       {events.length === 0 ? (
-        <div className="p-6 text-center text-sm text-slate-500">
-          No coordination events yet — inject a threat to begin.
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
+          <p className="text-sm text-[var(--fd-ink)]">No events yet</p>
+          <p className="max-w-xs text-sm text-[var(--fd-muted)]">
+            Inject a threat from demo controls or run the drone CV scanner to
+            watch the router coordinate a response.
+          </p>
         </div>
       ) : (
-        <ul className="space-y-3 overflow-y-auto p-4">
+        <ul className="relative flex-1 space-y-0 overflow-y-auto p-4">
+          <div
+            className="absolute bottom-4 left-[1.375rem] top-4 w-px bg-[var(--fd-border)]"
+            aria-hidden
+          />
           {events.map((event) => {
             const c = levelColor(event.level);
             return (
-              <li
-                key={event.id}
-                className="rounded-lg border-l-2 bg-slate-950/40 p-3"
-                style={{ borderColor: c }}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-slate-100">
-                    {event.beach?.name ?? "Unknown"}
+              <li key={event.id} className="relative pl-8 pb-5 last:pb-0">
+                <span
+                  className="absolute left-3 top-1.5 z-10 h-3 w-3 rounded-full ring-4 ring-[var(--fd-surface)]"
+                  style={{ background: c }}
+                  aria-hidden
+                />
+                <div className="rounded-lg bg-[var(--fd-elevated)]/70 p-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-sm font-medium text-[var(--fd-ink)]">
+                      {event.beach?.name ?? "Unknown beach"}
+                    </p>
+                    <span
+                      className="rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+                      style={{
+                        color: c,
+                        backgroundColor: `color-mix(in oklch, ${c} 18%, transparent)`,
+                      }}
+                    >
+                      Level {event.level}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--fd-muted)]">
+                    {typeLabels[event.type] ?? event.type} · {event.source} ·{" "}
+                    {new Date(event.createdAt).toLocaleTimeString()}
                   </p>
-                  <span
-                    className="rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
-                    style={{ color: c, background: `${c}1a` }}
-                  >
-                    L{event.level}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[11px] text-slate-500">
-                  {typeLabels[event.type] ?? event.type} · {event.source} ·{" "}
-                  {new Date(event.createdAt).toLocaleTimeString()}
-                </p>
-                {event.actions.length > 0 ? (
-                  <ul className="mt-2 space-y-1">
-                    {event.actions.map((action) => (
-                      <li
-                        key={action.id}
-                        className="flex gap-1.5 text-xs text-slate-300"
-                      >
-                        <span
-                          className={`shrink-0 font-medium ${
-                            channelStyles[action.channel] ?? "text-slate-400"
-                          }`}
+                  {event.actions.length > 0 ? (
+                    <ul className="mt-2.5 space-y-1.5 border-t border-[var(--fd-border)]/80 pt-2.5">
+                      {event.actions.map((action) => (
+                        <li
+                          key={action.id}
+                          className="flex gap-2 text-xs leading-relaxed text-[var(--fd-ink)]/90"
                         >
-                          {channelLabels[action.channel] ?? action.channel}
-                        </span>
-                        <span className="text-slate-400">·</span>
-                        <span>{action.message}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
+                          <span
+                            className={`shrink-0 font-medium ${
+                              channelStyles[action.channel] ?? "text-[var(--fd-muted)]"
+                            }`}
+                          >
+                            {channelLabels[action.channel] ?? action.channel}
+                          </span>
+                          <span className="text-[var(--fd-muted)]" aria-hidden>
+                            →
+                          </span>
+                          <span>{action.message}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
               </li>
             );
           })}

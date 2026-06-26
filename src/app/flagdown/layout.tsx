@@ -1,7 +1,8 @@
 import Link from "next/link";
+import "./flagdown.css";
 
 const navItems = [
-  { href: "/flagdown/dashboard", label: "Dashboard" },
+  { href: "/flagdown/dashboard", label: "Command centre" },
   { href: "/flagdown/lifeguard", label: "Lifeguard" },
 ];
 
@@ -11,29 +12,32 @@ export default function FlagdownLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-6 py-3.5">
-          <Link href="/" className="group flex items-center gap-2.5">
+    <div className="flagdown-app min-h-screen">
+      <header className="sticky top-0 z-30 border-b border-[var(--fd-border)] bg-[var(--fd-bg)]/92 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <Link href="/" className="group flex items-center gap-3">
             <span
-              className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500 text-slate-950 shadow-[0_0_18px_-2px_rgba(245,158,11,0.6)] transition-transform group-hover:scale-105"
+              className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--fd-accent)] text-[var(--fd-accent-ink)] transition-transform group-hover:scale-[1.03]"
               aria-hidden
             >
               <FlagIcon className="h-4 w-4" />
             </span>
-            <span className="flex flex-col leading-none">
-              <span className="font-sans text-sm font-semibold tracking-tight text-slate-100">
-                Flag<span className="text-amber-400">Down</span>
+            <span className="flex flex-col leading-tight">
+              <span className="text-sm font-semibold tracking-tight text-[var(--fd-ink)]">
+                Flag<span className="text-[var(--fd-accent)]">Down</span>
               </span>
-              <span className="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              <span className="text-xs text-[var(--fd-muted)]">
                 Northern Beaches Council
               </span>
             </span>
           </Link>
-          <nav className="flex items-center gap-1 font-sans text-sm">
+          <nav
+            className="flex items-center gap-1 text-sm"
+            aria-label="FlagDown navigation"
+          >
             <Link
               href="/"
-              className="rounded-md px-3 py-1.5 text-slate-400 transition-colors hover:bg-slate-900 hover:text-slate-100"
+              className="rounded-md px-3 py-1.5 text-[var(--fd-muted)] transition-colors hover:bg-[var(--fd-surface)] hover:text-[var(--fd-ink)]"
             >
               Home
             </Link>
@@ -41,7 +45,7 @@ export default function FlagdownLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-3 py-1.5 text-slate-300 transition-colors hover:bg-slate-900 hover:text-amber-400"
+                className="rounded-md px-3 py-1.5 text-[var(--fd-ink)]/85 transition-colors hover:bg-[var(--fd-surface)] hover:text-[var(--fd-accent)]"
               >
                 {item.label}
               </Link>
